@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "reflex-chakra"
+version = "0.1.0"
+description = "reflex using chakra components"
+authors = ["Elijah <elijahahianyo@gmail.com>"]
+readme = "README.md"
+packages = [{include = "reflex_chakra"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+reflex = ">=0.5.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
