@@ -3,7 +3,7 @@ name = "reflex-chakra"
 version = "0.1.0"
 description = "reflex using chakra components"
 authors = [
-    "Reflex Team <support@reflex.dev>"
+    "Reflex Team <contact@reflex.dev>"
 ]
 readme = "README.md"
 packages = [{include = "reflex_chakra"}]
