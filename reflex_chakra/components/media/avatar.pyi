@@ -5,7 +5,7 @@
 # ------------------------------------------------------
 from typing import Any, Callable, Dict, Literal, Optional, Union, overload
 
-from reflex_chakra.components import ChakraComponent
+from reflex_chakra.components.base import ChakraComponent
 from reflex.event import EventHandler, EventSpec
 from reflex.style import Style
 from reflex.vars import BaseVar, Var
