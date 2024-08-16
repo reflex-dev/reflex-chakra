@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from reflex_chakra.components import ChakraComponent, LiteralAvatarSize
+from reflex_chakra.components.base import ChakraComponent, LiteralAvatarSize
 from reflex.event import EventHandler
 from reflex.vars import Var
 

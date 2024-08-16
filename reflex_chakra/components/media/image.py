@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from reflex_chakra.components import ChakraComponent, LiteralImageLoading
+from reflex_chakra.components.base import ChakraComponent, LiteralImageLoading
 from reflex.components.component import Component
 from reflex.event import EventHandler
 from reflex.vars import Var

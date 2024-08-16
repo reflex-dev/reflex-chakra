@@ -2,7 +2,7 @@
 
 from typing import List
 
-from reflex_chakra.components import ChakraComponent
+from reflex_chakra.components.base import ChakraComponent
 from reflex.utils import format
 
 
