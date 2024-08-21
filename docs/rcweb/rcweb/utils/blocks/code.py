@@ -1,7 +1,7 @@
 """Code block components for documentation pages."""
 
 import reflex as rx
-from docs.rcweb.rcweb.constants import css, fonts
+from ...constants import css, fonts
 
 
 @rx.memo
@@ -26,15 +26,17 @@ def code_block(code: str, language: str):
             # can_copy=True,
         ),
         rx.button(
-            rx.icon("clipboard",
-                    color=rx.color("slate", 9),
-                    transition="color 0.035s ease-out",
-                    display="flex",
-                    justify_content="center",
-                    align_items="center",
-                    _hover={
+            rx.icon(
+                "clipboard",
+                color=rx.color("slate", 9),
+                transition="color 0.035s ease-out",
+                display="flex",
+                justify_content="center",
+                align_items="center",
+                _hover={
                     "color": rx.color("slate", 11),
-            }),
+                },
+            ),
             on_click=rx.set_clipboard(code),
             position="absolute",
             top="30px",
@@ -60,6 +62,7 @@ def code_block(code: str, language: str):
         margin_top="1em",
         width="100%",
     )
+
 
 @rx.memo
 def code_block_dark(code: str, language: str):
@@ -117,6 +120,7 @@ def code_block_dark(code: str, language: str):
         margin_top="1em",
         width="100%",
     )
+
 
 def code_block_markdown(*children, **props):
     language = props.get("language", "none")

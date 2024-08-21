@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import reflex as rx
 import reflex_chakra as rc
-from docs.rcweb.rcweb.constants import fonts
+from ..constants import fonts
+
+chakra_lib_items = []
 
 
 class SidebarItem(rx.Base):
@@ -46,15 +48,14 @@ def calculate_index(sidebar_items, url: str):
             return [i - sub] + index
     return None
 
+
 def get_component_link(category, clist, prefix="") -> str:
-    # if issubclass(clist[1][0], rc.ChakraComponent):
-    #     prefix = "chakra/"
     component_name = rx.utils.format.to_kebab_case(clist[0])
     # construct the component link. The component name points to the name of the md file.
     return f"/{prefix}{category.lower().replace(' ', '-')}/{component_name.lower()}"
 
+
 def get_category_children(category, category_list, prefix=""):
-    # breakpoint()
     category = category.replace("-", " ")
     if isinstance(category_list, dict):
         return SidebarItem(
@@ -78,13 +79,14 @@ def get_category_children(category, category_list, prefix=""):
 def get_sidebar_items_other_libraries(chakra_components):
     chakra_children = []
     for category in chakra_components:
-
         category_item = get_category_children(
-            category, chakra_components[category],
+            category,
+            chakra_components[category],
         )
         chakra_children.append(category_item)
 
     return chakra_children
+
 
 class NavbarState(rx.State):
     """The state for the navbar component."""
@@ -124,6 +126,7 @@ def sidebar_link(*children, **props):
         underline="none",
         **props,
     )
+
 
 def sidebar_leaf(
     item: SidebarItem,
@@ -299,35 +302,10 @@ def sidebar_item_comp(
         ),
     )
 
-def create_sidebar_section( items, index, url):
-    # Check if the section has any nested sections (Like the Other Libraries Section)
-    # nested = any(len(child.children) > 0 for item in items for child in item.children)
-    nested = False
-    # Make sure the index is a list
-    return rx.list_item(
-        # rx.link(
-        #     rx.heading(
-        #         section_title,
-        #         as_="h5",
-        #         style={
-        #             "color": rx.color("slate", 12),
-        #             "font-family": "Instrument Sans",
-        #             "font-size": "14px",
-        #             "font-style": "normal",
-        #             "font-weight": "600",
-        #             "line-height": "20px",
-        #             "letter-spacing": "-0.21px",
-        #             "transition": "color 0.035s ease-out",
-        #             "_hover": {
-        #                 "color": rx.color("violet", 9),
-        #             },
-        #         },
-        #     ),
-        #     underline="none",
-        #     padding_y="12px",
-        #     href=section_url,
-        # ),
 
+def create_sidebar_section(items, index, url):
+    nested = False
+    return rx.list_item(
         rc.accordion(
             *[
                 sidebar_item_comp(
@@ -352,29 +330,21 @@ def create_sidebar_section( items, index, url):
     )
 
 
-# @rx.memo
+@rx.memo
 def sidebar_comp(
     url: str,
-    other_libs,
     other_libs_index: list[int],
     width: str = "100%",
 ):
-
-    # from pcweb.pages.docs.library import library
-    # from pcweb.pages.docs.custom_components import custom_components
-
     ul_style = {
         "display": "flex",
         "flex_direction": "column",
         "align_items": "flex-start",
     }
-
     return rx.flex(
         rx.unordered_list(
             create_sidebar_section(
-                # "Other Libraries",
-                # library.path,
-                other_libs,
+                chakra_lib_items,
                 other_libs_index,
                 url,
             ),
@@ -405,20 +375,19 @@ def sidebar_comp(
         },
     )
 
+
 def sidebar(chakra_components, url=None, width: str = "100%") -> rx.Component:
     """Render the sidebar."""
-    other_libs = get_sidebar_items_other_libraries(chakra_components)
-    other_libs_index = calculate_index(other_libs, url)
+    global chakra_lib_items
+    chakra_lib_items = get_sidebar_items_other_libraries(chakra_components)
+    other_libs_index = calculate_index(chakra_lib_items, url)
     return rx.flex(
         sidebar_comp(
             url=url,
             other_libs_index=other_libs_index,
             width=width,
-            other_libs=other_libs
         ),
         width="100%",
         height="100%",
         justify="end",
     )
-
-

@@ -1,8 +1,7 @@
 """App styling."""
 
-
 import reflex as rx
-from docs.rcweb.rcweb.constants import fonts
+from . import fonts
 import reflex_chakra as rc
 
 font_weights = {
@@ -23,6 +22,7 @@ def get_code_style(color: str):
         "line_height": "1.5",
     }
 
+
 def get_code_style_rdx(color: str):
     return {
         "color": rx.color(color, 11),
@@ -32,6 +32,7 @@ def get_code_style_rdx(color: str):
         **fonts.code,
         "line_height": "1.5",
     }
+
 
 cell_style = {
     **fonts.small,
@@ -53,7 +54,7 @@ tab_style = {
     },
     "not:&[data-state='active']": {
         "color": rx.color("slate", 11),
-    }
+    },
 }
 
 
@@ -98,8 +99,8 @@ BASE_STYLE = {
     rc.link: {"text_decoration": "none", "_hover": {}},
     rx.markdown: {
         "background": "transparent",
-    }
-} 
+    },
+}
 
 # Fonts to include.
 STYLESHEETS = [
@@ -108,7 +109,7 @@ STYLESHEETS = [
 ]
 
 shadows = {
-	"small": "0px 2px 4px 0px rgba(28, 32, 36, 0.05);",
-	"medium": "0px 4px 8px 0px rgba(28, 32, 36, 0.04);",
-	"large": "0px 24px 12px 0px rgba(28, 32, 36, 0.02), 0px 8px 8px 0px rgba(28, 32, 36, 0.02), 0px 2px 6px 0px rgba(28, 32, 36, 0.02);",
+    "small": "0px 2px 4px 0px rgba(28, 32, 36, 0.05);",
+    "medium": "0px 4px 8px 0px rgba(28, 32, 36, 0.04);",
+    "large": "0px 24px 12px 0px rgba(28, 32, 36, 0.02), 0px 8px 8px 0px rgba(28, 32, 36, 0.02), 0px 2px 6px 0px rgba(28, 32, 36, 0.02);",
 }

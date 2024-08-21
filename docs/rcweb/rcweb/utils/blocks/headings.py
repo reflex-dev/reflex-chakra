@@ -1,7 +1,8 @@
 """Template for documentation pages."""
 
 import reflex as rx
-from docs.rcweb.rcweb.constants import css, fonts
+from ...constants import css, fonts
+
 icon_margins = {
     "h1": "10px",
     "h2": "5px",

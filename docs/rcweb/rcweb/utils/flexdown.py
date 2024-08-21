@@ -4,8 +4,8 @@ import reflex_chakra as rc
 import black
 import textwrap
 from typing import Any
-from docs.rcweb.rcweb.utils.blocks import headings, typography, code
-from docs.rcweb.rcweb.constants import fonts
+from .blocks import headings, typography, code
+from ..constants import fonts
 
 demo_box_style = {
     "padding": "24px",
@@ -17,6 +17,7 @@ demo_box_style = {
     "align_items": "center",
     "justify_content": "center",
 }
+
 
 @rx.memo
 def code_block(code: str, language: str):
@@ -40,9 +41,14 @@ def code_block(code: str, language: str):
             # can_copy=True,
         ),
         rx.button(
-            rx.icon("clipboard", color=rx.color("slate", 9), transition="color 0.035s ease-out", _hover={
-                "color": rx.color("slate", 11),
-            }),
+            rx.icon(
+                "clipboard",
+                color=rx.color("slate", 9),
+                transition="color 0.035s ease-out",
+                _hover={
+                    "color": rx.color("slate", 11),
+                },
+            ),
             on_click=rx.set_clipboard(code),
             position="absolute",
             top="30px",
@@ -68,6 +74,8 @@ def code_block(code: str, language: str):
         margin_top="1em",
         width="100%",
     )
+
+
 @rx.memo
 def code_block_dark(code: str, language: str):
     return rx.box(
@@ -122,6 +130,7 @@ def code_block_dark(code: str, language: str):
         width="100%",
     )
 
+
 def docdemobox(*children, **props) -> rx.Component:
     """Create a documentation demo box with the output of the code.
 
@@ -136,6 +145,7 @@ def docdemobox(*children, **props) -> rx.Component:
         style=demo_box_style,
         **props,
     )
+
 
 def doccode(
     code: str,
@@ -173,14 +183,15 @@ def doccode(
         language=language,
     )
 
+
 def docdemo(
-        code: str,
-        state: str | None = None,
-        comp: rx.Component | None = None,
-        context: bool = False,
-        demobox_props: dict[str, Any] | None = None,
-        theme: str | None = None,
-        **props,
+    code: str,
+    state: str | None = None,
+    comp: rx.Component | None = None,
+    context: bool = False,
+    demobox_props: dict[str, Any] | None = None,
+    theme: str | None = None,
+    **props,
 ) -> rx.Component:
     """Create a documentation demo with code and output.
 
@@ -217,14 +228,14 @@ def docdemo(
                         "UI",
                     ),
                     # style=tab_style,
-                    value="tab1"
+                    value="tab1",
                 ),
                 rx.tabs.trigger(
                     rx.hstack(
                         "Code",
                     ),
                     # style=tab_style,
-                    value="tab2"
+                    value="tab2",
                 ),
                 justify_content="end",
             ),
@@ -303,6 +314,7 @@ class DemoBlock(flexdown.blocks.Block):
             code, comp=comp, demobox_props=demobox_props, theme=self.theme, id=comp_id
         )
 
+
 component_map = {
     "h1": lambda text: headings.h1_comp_xd(text=text),
     "h2": lambda text: headings.h2_comp_xd(text=text),
@@ -320,6 +332,7 @@ xd = flexdown.Flexdown(
     component_map=component_map,
 )
 xd.clear_modules()
+
 
 def markdown(text):
     return xd.get_default_block().render_fn(content=text)

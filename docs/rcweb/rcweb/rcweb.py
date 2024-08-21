@@ -1,4 +1,5 @@
 """Welcome to Reflex! This file outlines the steps to create a basic app."""
+
 import os
 from pathlib import Path
 from collections import defaultdict
@@ -8,9 +9,25 @@ import reflex as rx
 import reflex_chakra as rc
 import flexdown
 
-from docs.rcweb.rcweb.utils.flexdown import xd
-from docs.rcweb.rcweb.utils.docpage import multi_docs
-from docs.rcweb.rcweb.constants import css
+from .utils.flexdown import xd
+from .utils.docpage import multi_docs
+from .constants import css
+
+
+def should_skip_compile(doc: flexdown.Document):
+    """Skip compilation if the markdown file has not been modified since the last compilation."""
+    if not os.environ.get("REFLEX_PERSIST_WEB_DIR", False):
+        return False
+
+    # Check if the doc has been compiled already.
+    compiled_output = f".web/pages/{doc.replace('.md', '.js')}"
+    # Get the timestamp of the compiled file.
+    compiled_time = (
+        os.path.getmtime(compiled_output) if os.path.exists(compiled_output) else 0
+    )
+    # Get the timestamp of the source file.
+    source_time = os.path.getmtime(doc)
+    return compiled_time > source_time
 
 
 def find_flexdown_files(directory: str) -> list[str]:
@@ -25,7 +42,8 @@ def find_flexdown_files(directory: str) -> list[str]:
     return [
         os.path.join(root, file).replace("\\", "/")
         for root, _, files in os.walk(directory)
-        for file in files if file.endswith(".md")
+        for file in files
+        if file.endswith(".md")
     ]
 
 
@@ -59,7 +77,11 @@ def execute_document_blocks(document, href):
     """
     source, env = document.content, document.metadata.copy()
     env.update({"__xd": xd, "__exec": True})
-    blocks = [block for block in xd.get_blocks(source, href) if block.__class__.__name__ in ["ExecBlock", "DemoBlock"]]
+    blocks = [
+        block
+        for block in xd.get_blocks(source, href)
+        if block.__class__.__name__ in ["ExecBlock", "DemoBlock"]
+    ]
     for block in blocks:
         block.render(env)
 
@@ -76,7 +98,9 @@ def convert_to_title_case(text: str) -> str:
     return " ".join(word.capitalize() for word in text.split("_"))
 
 
-def create_doc_component(doc_path: str, base_dir: str, component_registry: defaultdict) -> rx.Component:
+def create_doc_component(
+    doc_path: str, base_dir: str, component_registry: defaultdict
+) -> rx.Component:
     """Create a document component for a given file path.
 
     Args:
@@ -89,7 +113,8 @@ def create_doc_component(doc_path: str, base_dir: str, component_registry: defau
     """
     doc_path = doc_path.replace("\\", "/")
     route_path = rx.utils.format.to_kebab_case(
-        f"/{doc_path.removeprefix(base_dir).replace('.md', '/')}").replace("//", "/")
+        f"/{doc_path.removeprefix(base_dir).replace('.md', '/')}"
+    ).replace("//", "/")
     category = os.path.basename(os.path.dirname(doc_path)).title()
     document = flexdown.parse_file(doc_path)
     title = rx.utils.format.to_snake_case(os.path.basename(doc_path).replace(".md", ""))
@@ -121,7 +146,9 @@ def generate_document_routes(doc_paths: list[str], base_dir: str) -> list[rx.Com
     ]
 
 
-def setup_application_routes(app: rx.App, doc_routes: list[rx.Component], base_path: str):
+def setup_application_routes(
+    app: rx.App, doc_routes: list[rx.Component], base_path: str
+):
     """Set up application routes based on document components.
 
     Args:
@@ -157,12 +184,13 @@ def main():
     setup_application_routes(app, doc_routes, base_directory)
 
 
-
 app = rx.App(
-style=css.BASE_STYLE,
+    style=css.BASE_STYLE,
     stylesheets=css.STYLESHEETS,
     theme=rx.theme(
-        has_background=True, radius="large", accent_color="violet",
+        has_background=True,
+        radius="large",
+        accent_color="violet",
     ),
 )
 

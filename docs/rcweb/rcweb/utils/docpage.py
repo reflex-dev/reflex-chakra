@@ -2,11 +2,12 @@ import reflex as rx
 import reflex_chakra as rc
 from typing import Callable, Type, Any, Literal, Union, get_origin, get_args
 import inspect
+import flexdown
 from reflex.components.el.elements.base import BaseHTML
 import os
-from docs.rcweb.rcweb.utils.flexdown import xd, markdown, docdemobox
-from docs.rcweb.rcweb.utils.sidebar import sidebar as sb
-from docs.rcweb.rcweb.constants import css, fonts
+from ..utils.flexdown import xd, markdown, docdemobox
+from ..utils.sidebar import sidebar as sb
+from ..constants import css, fonts
 import textwrap
 import mistletoe
 
@@ -26,7 +27,6 @@ TYPE_COLORS = {
     "Literal": "gray",
     "Union": "gray",
 }
-
 
 EVENTS = {
     "on_focus": {
@@ -234,6 +234,8 @@ EVENTS = {
         "description": "The on_drop event handler is called when the user drops an item."
     },
 }
+
+
 def get_prev_next(url):
     """Get the previous and next links in the sidebar."""
     url = url.strip("/")
@@ -246,6 +248,7 @@ def get_prev_next(url):
             else:
                 return flat_items[i - 1], flat_items[i + 1]
     return None, None
+
 
 def get_default_value(lines: list[str], start_index: int) -> str:
     """Process lines of code to get the value of a prop, handling multi-line values.
@@ -283,6 +286,7 @@ class Prop(rx.Base):
     # The default value of the prop.
     default_value: str
 
+
 class Route(rx.Base):
     """A page route."""
 
@@ -303,6 +307,7 @@ class Route(rx.Base):
     # https://github.com/reflex-dev/reflex-web/pull/659#pullrequestreview-2021171902
     add_as_page: bool = True
 
+
 def get_path(component_fn: Callable):
     """Get the path for a page based on the file location.
 
@@ -312,10 +317,17 @@ def get_path(component_fn: Callable):
     module = inspect.getmodule(component_fn)
 
     # Create a path based on the module name.
-    return module.__name__.replace(".", "/").replace("_", "-").split("pcweb/pages")[1]+ "/"
+    return (
+        module.__name__.replace(".", "/").replace("_", "-").split("pcweb/pages")[1]
+        + "/"
+    )
+
 
 def docpage(
-        set_path: str | None = None, t: str | None = None, right_sidebar: bool = True, chakra_components = {}
+    set_path: str | None = None,
+    t: str | None = None,
+    right_sidebar: bool = True,
+    chakra_components={},
 ) -> rx.Component:
     """A template that most pages on the reflex.dev site should use.
 
@@ -353,22 +365,8 @@ def docpage(
             Returns:
                 The page with the template applied.
             """
-            # Import here to avoid circular imports.
-            # from pcweb.components.docpage.navbar import navbar
-            # from pcweb.components.docpage.sidebar import get_prev_next
-            # from pcweb.components.docpage.sidebar import sidebar as sb
-
-            categories = {
-                "Layout": [("Box", "#box"), ("Flex", "#flex"), ("Grid", "#grid")],
-                "Forms": [("Input", "#input"), ("Button", "#button"), ("Select", "#select")],
-                "Data Display": [("Text", "#text"), ("Heading", "#heading"), ("List", "#list")],
-            }
             # Create the docpage sidebar.
             sidebar = sb(url=path, width="280px", chakra_components=chakra_components)
-            # sidebar = side_bar2(categories)
-            # # Set the sidebar path for the navbar sidebar.
-            # nav_sidebar = sb(url=path, width="100%")
-            #
             # # Get the previous and next sidebar links.
             prev, next = get_prev_next(path)
             links = []
@@ -569,8 +567,8 @@ def docpage(
                                                 },
                                                 underline="none",
                                                 href=path
-                                                     + "#"
-                                                     + text.lower().replace(" ", "-"),
+                                                + "#"
+                                                + text.lower().replace(" ", "-"),
                                             )
                                         )
                                         if level == 1
@@ -596,8 +594,8 @@ def docpage(
                                                     },
                                                     underline="none",
                                                     href=path
-                                                         + "#"
-                                                         + text.lower().replace(" ", "-"),
+                                                    + "#"
+                                                    + text.lower().replace(" ", "-"),
                                                 )
                                             )
                                             if level == 2
@@ -623,8 +621,8 @@ def docpage(
                                                     underline="none",
                                                     padding_left="24px",
                                                     href=path
-                                                         + "#"
-                                                         + text.lower().replace(" ", "-"),
+                                                    + "#"
+                                                    + text.lower().replace(" ", "-"),
                                                 )
                                             )
                                         )
@@ -691,7 +689,10 @@ def docpage(
 
     return docpage
 
+
 import re
+
+
 class Source(rx.Base):
     """Parse the source code of a component."""
 
@@ -789,6 +790,7 @@ class Source(rx.Base):
     def get_comment(comments: list[str]):
         return "".join([comment.strip().strip("#") for comment in comments])
 
+
 def get_code_style(color: str):
     return {
         "color": rx.color(color, 11),
@@ -812,6 +814,7 @@ def hovercard(trigger: rx.Component, content: rx.Component) -> rx.Component:
         ),
     )
 
+
 def color_scheme_hovercard(literal_values: list[str]) -> rx.Component:
     return hovercard(
         rx.icon(tag="palette", size=15, color=rx.color("slate", 9), flex_shrink=0),
@@ -834,6 +837,7 @@ def color_scheme_hovercard(literal_values: list[str]) -> rx.Component:
             spacing="3",
         ),
     )
+
 
 def prop_docs(
     prop: Prop, prop_dict, component, is_interactive: bool
@@ -985,7 +989,9 @@ def prop_docs(
                     style=get_code_style(
                         "red"
                         if default_value == "False"
-                        else "green" if default_value == "True" else "gray"
+                        else "green"
+                        if default_value == "True"
+                        else "gray"
                     ),
                     text_wrap="nowrap",
                 )
@@ -1012,7 +1018,6 @@ def generate_props(src: Source, component, comp):
     prop_dict = {}
 
     is_interactive = False
-
 
     body = rx.table.body(
         *[
@@ -1103,6 +1108,7 @@ def generate_props(src: Source, component, comp):
         ),
     )
 
+
 def generate_valid_children(comp):
     if not comp._valid_children:
         return rx.text("")
@@ -1119,13 +1125,18 @@ def generate_valid_children(comp):
         padding_bottom="24px",
     )
 
+
 default_triggers = rx.Component.create().get_event_triggers()
+
+
 def same_trigger(t1, t2):
     if t1 is None or t2 is None:
         return False
     args1 = inspect.getfullargspec(t1).args
     args2 = inspect.getfullargspec(t2).args
     return args1 == args2
+
+
 def generate_event_triggers(comp, src):
     prop_name_to_description = {
         prop.name: prop.description
@@ -1220,6 +1231,7 @@ def generate_event_triggers(comp, src):
         align_items="start",
     )
 
+
 def component_docs(component_tuple, comp):
     """Generates documentation for a given component."""
 
@@ -1240,7 +1252,6 @@ def component_docs(component_tuple, comp):
         width="100%",
         padding_bottom="2em",
     )
-import flexdown
 
 
 def get_headings(comp):
@@ -1259,8 +1270,9 @@ def get_headings(comp):
     for child in comp.children:
         headings.extend(get_headings(child))
     return headings
-def get_toc(source, href, component_list=None):
 
+
+def get_toc(source, href, component_list=None):
     component_list = component_list or []
     component_list = component_list[1:]
 
@@ -1302,7 +1314,9 @@ def get_toc(source, href, component_list=None):
 
 
 def multi_docs(path, comp, component_list, title, chakra_components):
-    components = [component_docs(component_tuple, comp) for component_tuple in component_list[1:]]
+    components = [
+        component_docs(component_tuple, comp) for component_tuple in component_list[1:]
+    ]
     fname = path.strip("/") + ".md"
     ll_doc_exists = os.path.exists(fname.replace(".md", "-ll.md"))
 
