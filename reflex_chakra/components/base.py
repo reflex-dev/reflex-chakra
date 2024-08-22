@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from functools import lru_cache
 from typing import List, Literal
-import reflex as rx
+
+from reflex.components.component import Component
+from reflex.ivars.base import ImmutableVar
+from reflex.utils.imports import ImportDict, ImportVar
+from reflex.vars import Var
 
 
-class ChakraComponent(rx.Component):
+class ChakraComponent(Component):
     """A component that wraps a Chakra component."""
 
     library: str = "@chakra-ui/react@2.6.1"  # type: ignore
@@ -18,7 +22,7 @@ class ChakraComponent(rx.Component):
 
     @staticmethod
     @lru_cache(maxsize=None)
-    def _get_app_wrap_components() -> dict[tuple[int, str], rx.Component]:
+    def _get_app_wrap_components() -> dict[tuple[int, str], Component]:
         return {
             (60, "ChakraProvider"): chakra_provider,
         }
@@ -33,14 +37,14 @@ class ChakraComponent(rx.Component):
 
     @classmethod
     @lru_cache(maxsize=None)
-    def _get_dependencies_imports(cls) -> rx.utils.imports.ImportDict:
+    def _get_dependencies_imports(cls) -> ImportDict:
         """Get the imports from lib_dependencies for installing.
 
         Returns:
             The dependencies imports of the component.
         """
         return {
-            dep: [rx.ImportVar(tag=None, render=False)]
+            dep: [ImportVar(tag=None, render=False)]
             for dep in [
                 "@chakra-ui/system@2.5.7",
                 "framer-motion@10.16.4",
@@ -53,35 +57,33 @@ class ChakraProvider(ChakraComponent):
 
     tag = "ChakraProvider"
 
-    theme: rx.Var[str]
+    theme: Var[str]
 
     @classmethod
-    def create(cls) -> rx.Component:
+    def create(cls) -> Component:
         """Create a new ChakraProvider component.
 
         Returns:
             A new ChakraProvider component.
         """
         return super().create(
-            theme=rx.Var.create(
-                "extendTheme(theme)", _var_is_local=False, _var_is_string=False
-            ),
+            theme=ImmutableVar.create("extendTheme(theme)"),
         )
 
-    def add_imports(self) -> rx.utils.imports.ImportDict:
+    def add_imports(self) -> ImportDict:
         """Add imports for the ChakraProvider component.
 
         Returns:
             The import dict for the component.
         """
         return {
-            self.library: rx.ImportVar(tag="extendTheme", is_default=False),
-            "/utils/theme.js": rx.ImportVar(tag="theme", is_default=True),
+            self.library: ImportVar(tag="extendTheme", is_default=False),
+            "/utils/theme.js": ImportVar(tag="theme", is_default=True),
         }
 
     @staticmethod
     @lru_cache(maxsize=None)
-    def _get_app_wrap_components() -> dict[tuple[int, str], rx.Component]:
+    def _get_app_wrap_components() -> dict[tuple[int, str], Component]:
         return {
             (50, "ChakraColorModeProvider"): chakra_color_mode_provider,
         }
@@ -90,7 +92,7 @@ class ChakraProvider(ChakraComponent):
 chakra_provider = ChakraProvider.create()
 
 
-class ChakraColorModeProvider(rx.Component):
+class ChakraColorModeProvider(Component):
     """Next-themes integration for chakra colorModeProvider."""
 
     library = "/components/reflex/chakra_color_mode_provider.js"
