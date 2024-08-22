@@ -49,19 +49,26 @@ def calculate_index(sidebar_items, url: str):
     return None
 
 
-def get_component_link(category, clist, prefix="") -> str:
+def get_component_link(category: str | None, clist, prefix="") -> str:
     component_name = rx.utils.format.to_kebab_case(clist[0])
     # construct the component link. The component name points to the name of the md file.
-    return f"/{prefix}{category.lower().replace(' ', '-')}/{component_name.lower()}"
+    return "/".join(
+        [prefix, category.lower().replace(' ', '-') if category else '', component_name.lower()]).replace("//", "/")
 
 
-def get_category_children(category, category_list, prefix=""):
+def get_category_children(category, category_list, prefix="") -> SidebarItem | list[SidebarItem]:
     category = category.replace("-", " ")
     if isinstance(category_list, dict):
+        category_children = []
+        for c in category_list:
+            category_child = get_category_children(c, category_list[c])
+            category_children.extend(category_child) if isinstance(category_child, list) else category_children.append(
+                category_child)
+
         return SidebarItem(
             names=category,
             children=[
-                get_category_children(c, category_list[c]) for c in category_list
+                category_children
             ],
         )
     category_item_children = []
@@ -70,10 +77,11 @@ def get_category_children(category, category_list, prefix=""):
         name = rx.utils.format.to_title_case(component_name)
         item = SidebarItem(
             names=name,
-            link=get_component_link(category, c, prefix=prefix),
+            link=get_component_link(category, c) if not category == "Markdowns" else get_component_link(None, c),
         )
         category_item_children.append(item)
-    return SidebarItem(names=category, children=category_item_children)
+    return SidebarItem(names=category,
+                       children=category_item_children) if not category == "Markdowns" else category_item_children
 
 
 def get_sidebar_items_other_libraries(chakra_components):
@@ -83,8 +91,8 @@ def get_sidebar_items_other_libraries(chakra_components):
             category,
             chakra_components[category],
         )
-        chakra_children.append(category_item)
-
+        chakra_children.extend(category_item) if isinstance(category_item, list) else chakra_children.append(
+            category_item)
     return chakra_children
 
 
@@ -128,9 +136,15 @@ def sidebar_link(*children, **props):
     )
 
 
+def format_sidebar_route(route: str) -> str:
+    if not route.endswith("/"):
+        route += "/"
+    return route.replace("_", "-")
+
+
 def sidebar_leaf(
-    item: SidebarItem,
-    url: str,
+        item: SidebarItem,
+        url: str,
 ) -> rx.Component:
     """Get the leaf node of the sidebar."""
     item.link = item.link.replace("_", "-")
@@ -213,21 +227,6 @@ def sidebar_icon(name):
         "Getting Started": "rocket",
         "Tutorial": "life-buoy",
         "Components": "layers",
-        "Pages": "sticky-note",
-        "Styling": "palette",
-        "Assets": "folder-open-dot",
-        "Wrapping React": "atom",
-        "Vars": "variable",
-        "Events": "arrow-left-right",
-        "Substates": "boxes",
-        "API Routes": "route",
-        "Client Storage": "package-open",
-        "Database": "database",
-        "Authentication": "lock-keyhole",
-        "Utility Methods": "cog",
-        "Reflex Deploy": "earth",
-        "Self Hosting": "server",
-        "Custom Components": "blocks",
     }
 
     if name in mappings:
@@ -241,13 +240,56 @@ def sidebar_icon(name):
 
 
 def sidebar_item_comp(
-    item: SidebarItem,
-    index: list[int],
-    url: str,
+        item: SidebarItem,
+        index: list[int],
+        url: str,
 ):
     return rx.cond(
         len(item.children) == 0,
-        sidebar_leaf(item=item, url=url),
+        sidebar_leaf(item=item, url=url)
+        if not item.names in ("Introduction",)
+        else rc.accordion_item(
+            rc.accordion_button(
+                sidebar_icon(item.names),
+                rx.link(
+                    rx.text(
+                        item.names,
+                        style=fonts.small,
+                        color=rx.cond(
+                            format_sidebar_route(item.link) == url,
+                            rx.color("violet", 9),
+                            rx.color("slate", 9),
+                        ),
+                        _hover={
+                            "color": rx.color("slate", 11),
+                            "text_decoration": "none",
+                        },
+                    ),
+                    href=format_sidebar_route(item.link)
+                ),
+
+                rx.box(
+                    flex_grow=1,
+                ),
+                align_items="center",
+                transition="color 0.035s ease-out",
+                _hover={
+                    "color": rx.color("slate", 11),
+                },
+                style={
+                    "&[aria-expanded='true']": {
+                        "color": rx.color("slate", 11),
+                    },
+                },
+                color=rx.color("slate", 9),
+                width="100%",
+                padding_y="8px",
+                padding_left="8px",
+                padding_right="0px",
+            ),
+            border="none",
+            width="100%",
+        ),
         rc.accordion_item(
             rc.accordion_button(
                 sidebar_icon(item.names),
@@ -332,9 +374,9 @@ def create_sidebar_section(items, index, url):
 
 @rx.memo
 def sidebar_comp(
-    url: str,
-    other_libs_index: list[int],
-    width: str = "100%",
+        url: str,
+        other_libs_index: list[int],
+        width: str = "100%",
 ):
     ul_style = {
         "display": "flex",
@@ -342,6 +384,28 @@ def sidebar_comp(
         "align_items": "flex-start",
     }
     return rx.flex(
+        # rx.link(
+        #     rx.heading(
+        #         "introduction",
+        #         as_="h5",
+        #         style={
+        #             "color": rx.color("slate", 12),
+        #             "font-family": "Instrument Sans",
+        #             "font-size": "14px",
+        #             "font-style": "normal",
+        #             "font-weight": "600",
+        #             "line-height": "20px",
+        #             "letter-spacing": "-0.21px",
+        #             "transition": "color 0.035s ease-out",
+        #             "_hover": {
+        #                 "color": rx.color("violet", 9),
+        #             },
+        #         },
+        #     ),
+        #     underline="none",
+        #     padding_y="12px",
+        #     href="/introduction",
+        # ),
         rx.unordered_list(
             create_sidebar_section(
                 chakra_lib_items,

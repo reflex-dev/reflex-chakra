@@ -164,6 +164,7 @@ def setup_application_routes(
             image="/previews/index_preview.png",
             meta=[{"name": "theme-color", "content": route.background_color}],
         )
+    app.add_page(lambda: rx.fragment(), route="/", on_load=rx.redirect("/introduction"))
 
 
 def main():

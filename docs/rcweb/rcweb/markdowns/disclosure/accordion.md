@@ -10,8 +10,6 @@ components:
 ```python exec
 import reflex_chakra as rc
 import reflex as rx
-import reflex_chakra as rc
-import reflex as rx
 ```
 
 # Accordion
