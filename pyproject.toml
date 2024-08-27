@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reflex-chakra"
-version = "0.1.1a01"
+version = "0.5.10"
 description = "reflex using chakra components"
 authors = [
     "Elijah Ahianyo <elijah@reflex.dev>"
