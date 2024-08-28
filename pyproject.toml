@@ -12,6 +12,9 @@ packages = [{include = "reflex_chakra"}]
 python = "^3.8"
 reflex = ">=0.6.0a"
 
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.1.2,<8.0"
+
 
 [build-system]
 requires = ["poetry-core"]
