@@ -1,7 +1,7 @@
 """Badge component."""
 
 from reflex_chakra.components import ChakraComponent, LiteralVariant
-import reflex as rx
+from reflex.vars import Var
 
 
 class Badge(ChakraComponent):
@@ -10,7 +10,7 @@ class Badge(ChakraComponent):
     tag = "Badge"
 
     # Variant of the badge ("solid" | "subtle" | "outline")
-    variant: rx.Var[LiteralVariant]
+    variant: Var[LiteralVariant]
 
     # The color of the badge
-    color_scheme: rx.Var[str]
+    color_scheme: Var[str]
