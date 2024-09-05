@@ -11,8 +11,8 @@ from reflex.components.component import Component
 from reflex.ivars.base import ImmutableVar
 from reflex.utils.imports import ImportDict, ImportVar
 from reflex.vars import Var
-from reflex_chakra import constants
 
+from reflex_chakra import constants
 
 
 class ChakraComponent(Component):
