@@ -56,15 +56,21 @@ class ChakraComponent(Component):
         }
 
     @classmethod
-    def create(cls, *children, **props) -> rx.Component:
+    def create(cls, *children, **props) -> Component:
         # copy color mode provider file to client's asset dir if it doesnt exist.
+        client_asset_dir = Path.cwd() / constants.ASSETS_DIR_NAME
         if not (
-            color_mode_provider := (
-                constants.ASSETS_DIR / constants.COLOR_MODE_PROVIDER_FILENAME
+            client_color_mode_provider := (
+                Path.cwd()
+                / constants.ASSETS_DIR_NAME
+                / constants.COLOR_MODE_PROVIDER_FILENAME
             )
         ).exists():
-            shutil.copy(color_mode_provider, (Path.cwd() / "assets"))
-
+            client_asset_dir.mkdir(exist_ok=True)
+            shutil.copy(
+                constants.ASSETS_DIR / constants.COLOR_MODE_PROVIDER_FILENAME,
+                client_color_mode_provider.parent,
+            )
         return super().create(*children, **props)
 
 
