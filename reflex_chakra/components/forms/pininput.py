@@ -13,6 +13,7 @@ from reflex.ivars import ArrayVar
 from reflex.utils import format
 from reflex.utils.imports import ImportDict, merge_imports
 from reflex.vars import Var
+from reflex.ivars import ImmutableVar, ArrayVar
 
 
 class PinInput(ChakraComponent):
@@ -111,14 +112,13 @@ class PinInput(ChakraComponent):
         """
         if self.id:
             ref = format.format_array_ref(self.id, None)
-            refs_declaration = Var.range(self.length).foreach(
-                lambda: Var.create_safe("useRef(null)", _var_is_string=False),
+            refs_declaration = ImmutableVar.create_safe(
+                f"{str(ArrayVar.range(self.length))}.map(() => useRef(null))",
             )
-            refs_declaration._var_is_local = True
             if ref:
                 return (
                     f"const {ref} = {str(refs_declaration)}; "
-                    f"{str(Var.create_safe(ref, _var_is_string=False).as_ref())} = {ref}"
+                    f"{str(ImmutableVar.create_safe(ref).as_ref())} = {ref}"
                 )
             return super()._get_ref_hook()
 

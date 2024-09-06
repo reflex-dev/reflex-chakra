@@ -8,6 +8,7 @@ from reflex.base import Base
 from reflex.components.component import Component
 from reflex.constants import EventTriggers
 from reflex.vars import Var
+from reflex.ivars import ImmutableVar, LiteralVar
 
 
 class Option(Base):
@@ -310,10 +311,8 @@ class Select(Component):
         return {
             **super().get_event_triggers(),
             EventTriggers.ON_CHANGE: (
-                lambda e0: [
-                    Var.create_safe(f"{e0}.map(e => e.value)", _var_is_local=True)
-                ]
-                if self.is_multi.equals(Var.create_safe(True))
+                lambda e0: [ImmutableVar.create_safe(f"{e0}.map(e => e.value)")]
+                if self.is_multi.equals(LiteralVar.create(True))
                 else lambda e0: [e0]
             ),
         }
