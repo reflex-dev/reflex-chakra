@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import shutil
 from functools import lru_cache
+from pathlib import Path
 from typing import List, Literal
 
 from reflex.components.component import Component
 from reflex.ivars.base import ImmutableVar
 from reflex.utils.imports import ImportDict, ImportVar
 from reflex.vars import Var
+
+from reflex_chakra import constants
 
 
 class ChakraComponent(Component):
@@ -50,6 +54,24 @@ class ChakraComponent(Component):
                 "framer-motion@10.16.4",
             ]
         }
+
+    @classmethod
+    def create(cls, *children, **props) -> Component:
+        # copy color mode provider file to client's asset dir if it doesnt exist.
+        client_asset_dir = Path.cwd() / constants.ASSETS_DIR_NAME
+        if not (
+            client_color_mode_provider := (
+                Path.cwd()
+                / constants.ASSETS_DIR_NAME
+                / constants.COLOR_MODE_PROVIDER_FILENAME
+            )
+        ).exists():
+            client_asset_dir.mkdir(exist_ok=True)
+            shutil.copy(
+                constants.ASSETS_DIR / constants.COLOR_MODE_PROVIDER_FILENAME,
+                client_color_mode_provider.parent,
+            )
+        return super().create(*children, **props)
 
 
 class ChakraProvider(ChakraComponent):
@@ -95,7 +117,7 @@ chakra_provider = ChakraProvider.create()
 class ChakraColorModeProvider(Component):
     """Next-themes integration for chakra colorModeProvider."""
 
-    library = "/components/reflex/chakra_color_mode_provider.js"
+    library = "/public/chakra_color_mode_provider.js"
     tag = "ChakraColorModeProvider"
     is_default = True
 
