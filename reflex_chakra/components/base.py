@@ -71,6 +71,16 @@ class ChakraComponent(Component):
                 constants.ASSETS_DIR / constants.COLOR_MODE_PROVIDER_FILENAME,
                 client_color_mode_provider.parent,
             )
+
+        new_prop_names = [
+            prop for prop in cls.get_props() if prop in ["type", "min", "max"]
+        ]
+        for prop in new_prop_names:
+            under_prop = f"{prop}_"
+            if under_prop in props:
+                # TODO: decide whether to deprecate this prop namespace conversion
+                props[prop] = props.pop(under_prop)
+
         return super().create(*children, **props)
 
 
