@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import List, Literal
 
 from reflex.components.component import Component
-from reflex.ivars.base import ImmutableVar
 from reflex.utils.imports import ImportDict, ImportVar
 from reflex.vars import Var
 
@@ -99,7 +98,7 @@ class ChakraProvider(ChakraComponent):
             A new ChakraProvider component.
         """
         return super().create(
-            theme=ImmutableVar.create("extendTheme(theme)"),
+            theme=Var.create("extendTheme(theme)"),
         )
 
     def add_imports(self) -> ImportDict:

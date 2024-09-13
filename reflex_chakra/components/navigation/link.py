@@ -3,7 +3,6 @@
 from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
 from reflex.components.next.link import NextLink
-from reflex.ivars.base import ImmutableVar
 from reflex.utils.imports import ImportDict
 from reflex.vars import Var
 
@@ -25,7 +24,7 @@ class Link(ChakraComponent):
     text: Var[str]
 
     # What the link renders to.
-    as_: Var[Component] = ImmutableVar(_var_name="NextLink", _var_type=Component)
+    as_: Var[Component] = Var.create("NextLink").to(Component)
 
     # If true, the link will open in new tab.
     is_external: Var[bool]
