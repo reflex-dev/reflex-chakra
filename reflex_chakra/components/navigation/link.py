@@ -24,7 +24,7 @@ class Link(ChakraComponent):
     text: Var[str]
 
     # What the link renders to.
-    as_: Var[Component] = Var.create("NextLink").to(Component)
+    as_: Var[Component] = Var("NextLink", _var_type=Component)
 
     # If true, the link will open in new tab.
     is_external: Var[bool]

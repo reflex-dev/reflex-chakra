@@ -98,7 +98,7 @@ class ChakraProvider(ChakraComponent):
             A new ChakraProvider component.
         """
         return super().create(
-            theme=Var.create("extendTheme(theme)"),
+            theme=Var("extendTheme(theme)", _var_type=str),
         )
 
     def add_imports(self) -> ImportDict:
