@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import List, Literal
 
 from reflex.components.component import Component
+from reflex.utils.exec import is_backend_only
 from reflex.utils.imports import ImportDict, ImportVar
 from reflex.vars import Var
 
@@ -56,20 +57,21 @@ class ChakraComponent(Component):
 
     @classmethod
     def create(cls, *children, **props) -> Component:
-        # copy color mode provider file to client's asset dir if it doesnt exist.
-        client_asset_dir = Path.cwd() / constants.ASSETS_DIR_NAME
-        if not (
-            client_color_mode_provider := (
-                Path.cwd()
-                / constants.ASSETS_DIR_NAME
-                / constants.COLOR_MODE_PROVIDER_FILENAME
-            )
-        ).exists():
-            client_asset_dir.mkdir(exist_ok=True)
-            shutil.copy(
-                constants.ASSETS_DIR / constants.COLOR_MODE_PROVIDER_FILENAME,
-                client_color_mode_provider.parent,
-            )
+        if not is_backend_only():
+            # copy color mode provider file to client's asset dir if it doesnt exist.
+            client_asset_dir = Path.cwd() / constants.ASSETS_DIR_NAME
+            if not (
+                client_color_mode_provider := (
+                    Path.cwd()
+                    / constants.ASSETS_DIR_NAME
+                    / constants.COLOR_MODE_PROVIDER_FILENAME
+                )
+            ).exists():
+                client_asset_dir.mkdir(exist_ok=True)
+                shutil.copy(
+                    constants.ASSETS_DIR / constants.COLOR_MODE_PROVIDER_FILENAME,
+                    client_color_mode_provider.parent,
+                )
 
         new_prop_names = [
             prop for prop in cls.get_props() if prop in ["type", "min", "max"]
