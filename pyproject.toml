@@ -8,7 +8,7 @@ packages = [{ include = "reflex_chakra" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-reflex = ">=0.6.0a"
+reflex = {git = "https://github.com/benedikt-bartscher/reflex.git", rev = "run-mode-helpers"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.1.2,<8.0"
