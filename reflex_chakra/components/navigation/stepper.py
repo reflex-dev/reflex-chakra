@@ -12,7 +12,7 @@ class Stepper(ChakraComponent):
 
     tag = "Stepper"
 
-    # Secifies the orientation; can be used to control whether the steps are displayed vertically or horizontally.
+    # The orientation of Stepper: 'vertical' | 'horizontal'. Default: 'bottom'
     orientation: Var[Literal["vertical", "horizontal"]]
 
     # The color scheme to use for the stepper; default is blue.
