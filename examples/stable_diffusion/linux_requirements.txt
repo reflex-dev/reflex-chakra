@@ -1,0 +1,7 @@
+reflex==0.2.0
+torch
+diffusers
+pillow
+transformers
+accelerate
+xformers

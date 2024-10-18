@@ -1,0 +1,5 @@
+reflex==0.3.8
+torch
+diffusers
+pillow
+transformers
