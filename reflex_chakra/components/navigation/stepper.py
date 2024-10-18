@@ -95,17 +95,17 @@ class StepSeparator(ChakraComponent):
 class StepStatus(ChakraComponent):
     """A component that displays a number or icon based on the status of a step."""
 
-    # [not working yet]
-    # active, complete, and incomplete should also be able to accept StepIcon or StepNumber components
-    # currently, these props only support strings
+    tag = "StepStatus"
 
+    # The CSS class name to apply when a step is the currently active step.
     active: Var[str]
 
+    # The CSS class name to apply when a step is completed.
     complete: Var[str]
 
+    # The CSS class name to apply when a step is incomplete.
     incomplete: Var[str]
 
-    tag = "StepStatus"
 
 
 class StepTitle(ChakraComponent):
