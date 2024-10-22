@@ -1,6 +1,6 @@
 """A component to indicate progress through a multi-step process."""
 
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 from reflex_chakra.components import ChakraComponent, LiteralColorScheme
 from reflex.components.component import Component
@@ -24,8 +24,8 @@ class Stepper(ChakraComponent):
     # The index of the current step.
     index: Var[int]
 
-    # The size of the steps in the stepper.
-    size: Var[str]
+    # # The size of the steps in the stepper.
+    # size: Var[str]
 
     @classmethod
     def create(
@@ -99,10 +99,13 @@ class StepStatus(ChakraComponent):
     # active, complete, and incomplete should also be able to accept StepIcon or StepNumber components
     # currently, these props only support strings
 
+    # The element to show when the step is current
     active: Var[str]
 
+    # The element to show when the step is complete
     complete: Var[str]
 
+    # The element to show when the step is incomplete
     incomplete: Var[str]
 
     tag = "StepStatus"

@@ -1,5 +1,5 @@
 reflex==0.5.9
 reflex-chakra==0.1.1a1
 mistletoe==1.4.0
-flexdown==0.1.5a10
+flexdown>=0.1.5a11
 
