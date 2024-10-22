@@ -358,7 +358,7 @@ def create_sidebar_section(items, index, url):
                 for item in items
             ],
             allow_multiple=True,
-            default_index=index if index is not None else [],
+            default_index=rx.cond(index, index, []),
             width="100%",
             padding_left="0em",
             margin_left="0em",

@@ -9,7 +9,7 @@ from typing import List, Literal
 
 from reflex.components.component import Component
 from reflex.utils.imports import ImportDict, ImportVar
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 from reflex_chakra import constants
 
@@ -98,7 +98,7 @@ class ChakraProvider(ChakraComponent):
             A new ChakraProvider component.
         """
         return super().create(
-            theme=Var("extendTheme(theme)", _var_type=str),
+            theme=Var(_js_expr="extendTheme(theme)", _var_type=str),
         )
 
     def add_imports(self) -> ImportDict:
