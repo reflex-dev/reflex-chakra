@@ -109,7 +109,7 @@ class ChakraProvider(ChakraComponent):
         """
         return {
             self.library: ImportVar(tag="extendTheme", is_default=False),
-            "/utils/theme.js": ImportVar(tag="theme", is_default=True),
+            "$/utils/theme.js": ImportVar(tag="theme", is_default=True),
         }
 
     @staticmethod
