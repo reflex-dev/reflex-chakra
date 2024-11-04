@@ -440,17 +440,72 @@ def sidebar_comp(
     )
 
 
-def sidebar(chakra_components, url=None, width: str = "100%") -> rx.Component:
-    """Render the sidebar."""
+class MobileAndTabletSidebarState(rx.State):
+    show_right: bool = False
+    show_top: bool = False
+
+    def top(self):
+        self.show_top = not (self.show_top)
+
+    def right(self):
+        self.show_right = not (self.show_right)
+
+
+def sidebar_on_mobile_and_tablet(component):
+    return rc.vstack(
+        rc.drawer(
+            rc.drawer_overlay(
+                rc.drawer_content(
+                    rc.box(
+                        component,
+                        margin_top="2em",
+                    ),
+                    rc.drawer_footer(
+                        rc.icon_button(
+                            rx.icon(
+                                "x",
+                                size=24,
+                                style={
+                                    "[data-state=open] &": {
+                                        "display": "flex",
+                                    },
+                                    "[data-state=closed] &": {
+                                        "display": "none",
+                                    },
+                                },
+                                class_name="!text-slate-9 shrink-0",
+                            ),
+                            on_click=MobileAndTabletSidebarState.right,
+                        )
+                    ),
+                    bg="rgba(0, 0, 0)",
+                )
+            ),
+            size="full",
+            is_open=MobileAndTabletSidebarState.show_right,
+            width="100vw"
+        ),
+    )
+
+
+def get_sidebar_content(chakra_components, url=None, width: str = "100%"):
     global chakra_lib_items
     chakra_lib_items = get_sidebar_items_other_libraries(chakra_components)
     other_libs_index = calculate_index(chakra_lib_items, url)
+    return sidebar_comp(
+        url=url,
+        other_libs_index=other_libs_index,
+        width=width,
+    )
+
+
+def sidebar(chakra_components, url=None, width: str = "100%") -> rx.Component:
+    """Render the sidebar."""
+
+    side_bar_content = get_sidebar_content(chakra_components, url, width)
     return rx.flex(
-        sidebar_comp(
-            url=url,
-            other_libs_index=other_libs_index,
-            width=width,
-        ),
+        sidebar_on_mobile_and_tablet(side_bar_content),
+        side_bar_content,
         width="100%",
         height="100%",
         justify="end",
