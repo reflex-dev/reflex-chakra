@@ -1,1 +1,2 @@
-reflex>=0.3.8
+reflex>=0.6.5a
+reflex-chakra>=0.6.0
