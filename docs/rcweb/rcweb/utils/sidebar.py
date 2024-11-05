@@ -384,28 +384,6 @@ def sidebar_comp(
         "align_items": "flex-start",
     }
     return rx.flex(
-        # rx.link(
-        #     rx.heading(
-        #         "introduction",
-        #         as_="h5",
-        #         style={
-        #             "color": rx.color("slate", 12),
-        #             "font-family": "Instrument Sans",
-        #             "font-size": "14px",
-        #             "font-style": "normal",
-        #             "font-weight": "600",
-        #             "line-height": "20px",
-        #             "letter-spacing": "-0.21px",
-        #             "transition": "color 0.035s ease-out",
-        #             "_hover": {
-        #                 "color": rx.color("violet", 9),
-        #             },
-        #         },
-        #     ),
-        #     underline="none",
-        #     padding_y="12px",
-        #     href="/introduction",
-        # ),
         rx.unordered_list(
             create_sidebar_section(
                 chakra_lib_items,
@@ -479,7 +457,7 @@ def sidebar_on_mobile_and_tablet(component):
                         )
                     ),
                     bg="rgba(0, 0, 0)",
-                )
+                ),
             ),
             size="full",
             is_open=MobileAndTabletSidebarState.show_right,
@@ -502,10 +480,9 @@ def get_sidebar_content(chakra_components, url=None, width: str = "100%"):
 def sidebar(chakra_components, url=None, width: str = "100%") -> rx.Component:
     """Render the sidebar."""
 
-    side_bar_content = get_sidebar_content(chakra_components, url, width)
     return rx.flex(
-        sidebar_on_mobile_and_tablet(side_bar_content),
-        side_bar_content,
+        sidebar_on_mobile_and_tablet(get_sidebar_content(chakra_components, url, "100%")),
+        get_sidebar_content(chakra_components, url, width),
         width="100%",
         height="100%",
         justify="end",
