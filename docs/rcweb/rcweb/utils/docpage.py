@@ -515,7 +515,7 @@ def docpage(
                         ),
                         mobile_and_tablet(
                             rc.icon_button(
-                                rx.icon("menu"), on_click=MobileAndTabletSidebarState.right,
+                                rx.icon("menu"), on_click=MobileAndTabletSidebarState.toggle_drawer,
                                 float="right"
                             ),
                         ),

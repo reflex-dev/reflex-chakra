@@ -362,6 +362,7 @@ def create_sidebar_section(items, index, url):
             width="100%",
             padding_left="0em",
             margin_left="0em",
+            margin_top="5em",
         ),
         margin_left="0em",
         direction="column",
@@ -419,14 +420,10 @@ def sidebar_comp(
 
 
 class MobileAndTabletSidebarState(rx.State):
-    show_right: bool = False
-    show_top: bool = False
+    drawer_is_open: bool = False
 
-    def top(self):
-        self.show_top = not (self.show_top)
-
-    def right(self):
-        self.show_right = not (self.show_right)
+    def toggle_drawer(self):
+        self.drawer_is_open = not (self.drawer_is_open)
 
 
 def sidebar_on_mobile_and_tablet(component):
@@ -453,16 +450,18 @@ def sidebar_on_mobile_and_tablet(component):
                                 },
                                 class_name="!text-slate-9 shrink-0",
                             ),
-                            on_click=MobileAndTabletSidebarState.right,
+                            on_click=MobileAndTabletSidebarState.toggle_drawer,
                         )
                     ),
                     bg="rgba(0, 0, 0)",
                 ),
             ),
             size="full",
-            is_open=MobileAndTabletSidebarState.show_right,
+            is_open=MobileAndTabletSidebarState.drawer_is_open,
             width="100vw"
         ),
+        on_unmount=MobileAndTabletSidebarState.set_drawer_is_open(False),
+
     )
 
 
