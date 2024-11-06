@@ -362,6 +362,7 @@ def create_sidebar_section(items, index, url):
             width="100%",
             padding_left="0em",
             margin_left="0em",
+            margin_top="5em",
         ),
         margin_left="0em",
         direction="column",
@@ -384,28 +385,6 @@ def sidebar_comp(
         "align_items": "flex-start",
     }
     return rx.flex(
-        # rx.link(
-        #     rx.heading(
-        #         "introduction",
-        #         as_="h5",
-        #         style={
-        #             "color": rx.color("slate", 12),
-        #             "font-family": "Instrument Sans",
-        #             "font-size": "14px",
-        #             "font-style": "normal",
-        #             "font-weight": "600",
-        #             "line-height": "20px",
-        #             "letter-spacing": "-0.21px",
-        #             "transition": "color 0.035s ease-out",
-        #             "_hover": {
-        #                 "color": rx.color("violet", 9),
-        #             },
-        #         },
-        #     ),
-        #     underline="none",
-        #     padding_y="12px",
-        #     href="/introduction",
-        # ),
         rx.unordered_list(
             create_sidebar_section(
                 chakra_lib_items,
@@ -440,17 +419,69 @@ def sidebar_comp(
     )
 
 
-def sidebar(chakra_components, url=None, width: str = "100%") -> rx.Component:
-    """Render the sidebar."""
+class MobileAndTabletSidebarState(rx.State):
+    drawer_is_open: bool = False
+
+    def toggle_drawer(self):
+        self.drawer_is_open = not (self.drawer_is_open)
+
+
+def sidebar_on_mobile_and_tablet(component):
+    return rc.vstack(
+        rc.drawer(
+            rc.drawer_overlay(
+                rc.drawer_content(
+                    rc.box(
+                        component,
+                        margin_top="2em",
+                    ),
+                    rc.drawer_footer(
+                        rc.icon_button(
+                            rx.icon(
+                                "x",
+                                size=24,
+                                style={
+                                    "[data-state=open] &": {
+                                        "display": "flex",
+                                    },
+                                    "[data-state=closed] &": {
+                                        "display": "none",
+                                    },
+                                },
+                                class_name="!text-slate-9 shrink-0",
+                            ),
+                            on_click=MobileAndTabletSidebarState.toggle_drawer,
+                        )
+                    ),
+                    bg="rgba(0, 0, 0)",
+                ),
+            ),
+            size="full",
+            is_open=MobileAndTabletSidebarState.drawer_is_open,
+            width="100vw"
+        ),
+        on_unmount=MobileAndTabletSidebarState.set_drawer_is_open(False),
+
+    )
+
+
+def get_sidebar_content(chakra_components, url=None, width: str = "100%"):
     global chakra_lib_items
     chakra_lib_items = get_sidebar_items_other_libraries(chakra_components)
     other_libs_index = calculate_index(chakra_lib_items, url)
+    return sidebar_comp(
+        url=url,
+        other_libs_index=other_libs_index,
+        width=width,
+    )
+
+
+def sidebar(chakra_components, url=None, width: str = "100%") -> rx.Component:
+    """Render the sidebar."""
+
     return rx.flex(
-        sidebar_comp(
-            url=url,
-            other_libs_index=other_libs_index,
-            width=width,
-        ),
+        sidebar_on_mobile_and_tablet(get_sidebar_content(chakra_components, url, "100%")),
+        get_sidebar_content(chakra_components, url, width),
         width="100%",
         height="100%",
         justify="end",

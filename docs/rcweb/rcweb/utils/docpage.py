@@ -7,9 +7,11 @@ from reflex.components.el.elements.base import BaseHTML
 import os
 from ..utils.flexdown import xd, markdown, docdemobox
 from ..utils.sidebar import sidebar as sb
+from ..utils.sidebar import MobileAndTabletSidebarState
 from ..constants import css, fonts
 import textwrap
 import mistletoe
+from reflex.style import toggle_color_mode
 
 flat_items = []
 
@@ -323,6 +325,20 @@ def get_path(component_fn: Callable):
     )
 
 
+def mobile_and_tablet(*children, **props):
+    """Create a component that is only visible on mobile and tablet.
+
+        Args:
+            *children: The children to pass to the component.
+            **props: The props to pass to the component.
+
+        Returns:
+            The component.
+        """
+
+    return rx.box(*children, **props, display=["inline", "inline", "inline", "none"])
+
+
 def docpage(
     set_path: str | None = None,
     t: str | None = None,
@@ -479,11 +495,43 @@ def docpage(
 
             # Return the templated page.
             return rx.flex(
-                # navbar(),
+                # navbar
+                rc.flex(
+                    rc.box(
+                        rx.box(
+                            rx.el.button(
+                                rx.color_mode.icon(
+                                    light_component=rx.icon(
+                                        "sun", size=16, class_name="!text-slate-9"
+                                    ),
+                                    dark_component=rx.icon(
+                                        "moon", size=16, class_name="!text-slate-9"
+                                    ),
+                                ),
+                                on_click=toggle_color_mode,
+                                class_name="flex flex-row justify-center items-center px-3 py-0.5 w-full h-[47px]",
+                            ),
+                            float="right"
+                        ),
+                        mobile_and_tablet(
+                            rc.icon_button(
+                                rx.icon("menu"), on_click=MobileAndTabletSidebarState.toggle_drawer,
+                                float="right"
+                            ),
+                        ),
+                        justify="space-between",
+                        align_items="center",
+                        padding="1em",
+                        width="100%",
+                    ),
+                    width="100%",
+                    justify="center",
+                ),
+
+
                 rx.el.main(
                     rx.box(
                         sidebar,
-                        margin_top="105px",
                         height="100%",
                         width="24%",
                         display=["none", "none", "none", "none", "flex", "flex"],
@@ -520,7 +568,7 @@ def docpage(
                             ),
                             # docpage_footer(path=path),
                             padding_x=["16px", "24px", "24px", "48px", "96px"],
-                            margin_top=["105px", "145px", "0px", "0px", "0px"],
+                            margin_top=["0px", "0px", "0px", "0px", "0px"],
                             padding_top="5em",
                         ),
                         width=(
@@ -646,7 +694,6 @@ def docpage(
                             max_height="80vh",
                             overflow_y="scroll",
                         ),
-                        margin_top="105px",
                         width="18%",
                         height="100%",
                         display=(
