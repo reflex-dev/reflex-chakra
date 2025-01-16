@@ -126,7 +126,7 @@ chakra_provider = ChakraProvider.create()
 class ChakraColorModeProvider(Component):
     """Next-themes integration for chakra colorModeProvider."""
 
-    library = "/public/chakra_color_mode_provider.js"
+    library = "$/public/chakra_color_mode_provider.js"
     tag = "ChakraColorModeProvider"
     is_default = True
 

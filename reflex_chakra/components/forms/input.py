@@ -79,7 +79,7 @@ class Input(ChakraComponent):
         Returns:
             The import dict.
         """
-        return {"/utils/state": "set_val"}
+        return {"$/utils/state": "set_val"}
 
     @classmethod
     def create(cls, *children, **props) -> Component:
