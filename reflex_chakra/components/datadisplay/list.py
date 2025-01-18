@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
-from reflex.components.core.foreach import Foreach
+from reflex.components.core.foreach import foreach
 from reflex.vars import Var
 
 
@@ -36,7 +36,7 @@ class List(ChakraComponent):
         """
         if len(children) == 0:
             if isinstance(items, Var):
-                children = [Foreach.create(items, ListItem.create)]
+                children = [foreach(items, ListItem.create)]
             else:
                 children = [ListItem.create(item) for item in items or []]
         return super().create(*children, **props)

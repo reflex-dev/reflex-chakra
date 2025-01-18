@@ -3,7 +3,7 @@
 from reflex_chakra.components import ChakraComponent
 from reflex_chakra.components.navigation.link import Link
 from reflex.components.component import Component
-from reflex.components.core.foreach import Foreach
+from reflex.components.core.foreach import foreach
 from reflex.vars import Var
 
 
@@ -35,7 +35,7 @@ class Breadcrumb(ChakraComponent):
         if len(children) == 0:
             if isinstance(items, Var):
                 children = [
-                    Foreach.create(
+                    foreach(
                         items,
                         lambda item: BreadcrumbItem.create(label=item[0], href=item[1]),
                     ),
