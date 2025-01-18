@@ -1,4 +1,4 @@
-import json
+from pprint import pformat
 from typing import Any
 
 import reflex as rx
@@ -24,11 +24,11 @@ class State(rx.State):
     def on_error(self, error: str):
         self.last_error = error
 
-    @rx.var
-    def json_result(self) -> str:
-        return json.dumps(self.last_result, indent=2)
+    @rx.var(cache=True)
+    def pretty_result(self) -> str:
+        return pformat(self.get_value(self.last_result))
 
-    @rx.var
+    @rx.var(cache=True)
     def is_link(self) -> bool:
         return self.last_scan.startswith("http")
 
@@ -67,7 +67,7 @@ def index() -> rx.Component:
             border="1px solid black",
             width="80vw",
         ),
-        rc.code(State.json_result, white_space="pre-wrap"),
+        rc.code(State.pretty_result, white_space="pre-wrap"),
         spacing="1.5em",
     )
 

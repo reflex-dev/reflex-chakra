@@ -1,11 +1,14 @@
-from typing import Dict
+from typing import Dict, Tuple
 import reflex as rx
 from reflex.components.component import NoSSRComponent
-from reflex.vars import BaseVar, Var
+
+
+def _on_error_signature(err: rx.Var[dict]) -> Tuple[rx.Var[str]]:
+    return err.message,
 
 
 class QrScanner(NoSSRComponent):
-    library = "@yudiel/react-qr-scanner"
+    library = "@yudiel/react-qr-scanner@^1.2.10"
     tag = "QrScanner"
 
     # The delay between scans in milliseconds.
@@ -20,15 +23,9 @@ class QrScanner(NoSSRComponent):
     container_style: rx.Var[Dict[str, str]]
     video_style: rx.Var[Dict[str, str]]
 
-    def get_event_triggers(self) -> Dict[str, Var]:
-        """Dict mapping (event -> expected arguments)."""
-
-        return {
-            **super().get_event_triggers(),
-            "on_result": lambda e0: [e0],
-            "on_decode": lambda e0: [e0],
-            "on_error": lambda e0: [Var.create("_e0?.message", _var_is_local=False)],
-        }
+    on_result: rx.EventHandler[rx.event.passthrough_event_spec(dict)]
+    on_decode: rx.EventHandler[rx.event.passthrough_event_spec(str)]
+    on_error: rx.EventHandler[_on_error_signature]
 
 
 qr_scanner = QrScanner.create
