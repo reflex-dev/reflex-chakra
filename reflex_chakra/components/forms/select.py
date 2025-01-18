@@ -5,7 +5,7 @@ from typing import Any, List
 from reflex_chakra.components import ChakraComponent, LiteralInputVariant
 from reflex_chakra.components.typography.text import Text
 from reflex.components.component import Component
-from reflex.components.core.foreach import Foreach
+from reflex.components.core.foreach import foreach
 from reflex.event import EventHandler
 from reflex.utils.types import _issubclass
 from reflex.vars import Var
@@ -73,7 +73,7 @@ class Select(ChakraComponent):
             and isinstance(children[0], Var)
             and _issubclass(children[0]._var_type, List)
         ):
-            children = [Foreach.create(children[0], lambda item: Option.create(item))]
+            children = [foreach(children[0], lambda item: Option.create(item))]
         return super().create(*children, **props)
 
 
