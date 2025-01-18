@@ -4,7 +4,7 @@ from .button import Button, ButtonGroup
 from .checkbox import Checkbox, CheckboxGroup
 from .colormodeswitch import (
     ColorModeButton,
-    ColorModeIcon,
+    color_mode_icon,
     ColorModeScript,
     ColorModeSwitch,
 )

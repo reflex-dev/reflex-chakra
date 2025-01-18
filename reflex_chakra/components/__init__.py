@@ -51,7 +51,6 @@ circular_progress_label = CircularProgressLabel.create
 code = Code.create
 collapse = Collapse.create
 color_mode_button = ColorModeButton.create
-color_mode_icon = ColorModeIcon.create
 color_mode_switch = ColorModeSwitch.create
 component = Component.create
 container = Container.create

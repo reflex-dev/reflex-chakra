@@ -20,7 +20,7 @@ from __future__ import annotations
 from reflex_chakra.components import ChakraComponent
 from reflex_chakra.components.media.icon import Icon
 from reflex.components.component import BaseComponent
-from reflex.components.core.cond import Cond, color_mode_cond
+from reflex.components.core.cond import color_mode_cond
 from reflex.style import LIGHT_COLOR_MODE, color_mode, toggle_color_mode
 
 from .button import Button
@@ -30,28 +30,23 @@ DEFAULT_LIGHT_ICON: Icon = Icon.create(tag="sun")
 DEFAULT_DARK_ICON: Icon = Icon.create(tag="moon")
 
 
-class ColorModeIcon(Cond):
-    """Displays the current color mode as an icon."""
+def color_mode_icon(
+    light_component: BaseComponent | None = None,
+    dark_component: BaseComponent | None = None,
+):
+    """Create an icon component based on color_mode.
 
-    @classmethod
-    def create(
-        cls,
-        light_component: BaseComponent | None = None,
-        dark_component: BaseComponent | None = None,
-    ):
-        """Create an icon component based on color_mode.
+    Args:
+        light_component: the component to display when color mode is default
+        dark_component: the component to display when color mode is dark (non-default)
 
-        Args:
-            light_component: the component to display when color mode is default
-            dark_component: the component to display when color mode is dark (non-default)
-
-        Returns:
-            The conditionally rendered component
-        """
-        return color_mode_cond(
-            light=light_component or DEFAULT_LIGHT_ICON,
-            dark=dark_component or DEFAULT_DARK_ICON,
-        )
+    Returns:
+        The conditionally rendered component
+    """
+    return color_mode_cond(
+        light=light_component or DEFAULT_LIGHT_ICON,
+        dark=dark_component or DEFAULT_DARK_ICON,
+    )
 
 
 class ColorModeSwitch(Switch):
