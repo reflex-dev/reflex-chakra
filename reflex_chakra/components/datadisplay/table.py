@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
-from reflex.components.core.foreach import Foreach
+from reflex.components.core.foreach import foreach
 from reflex.utils import types
 from reflex.vars import Var
 
@@ -137,7 +137,7 @@ class Tbody(ChakraComponent):
 
             if isinstance(rows, Var):
                 children = [
-                    Foreach.create(
+                    foreach(
                         rows, lambda row: Tr.create(cell_type="data", cells=row)
                     )
                 ]
@@ -260,7 +260,7 @@ class Tr(ChakraComponent):
         cell_cls = types.get(cell_type)
         if len(children) == 0 and cell_cls:
             if isinstance(cells, Var):
-                children = [Foreach.create(cells, cell_cls.create)]
+                children = [foreach(cells, cell_cls.create)]
             else:
                 children = [cell_cls.create(cell) for cell in cells or []]
         return super().create(*children, **props)
