@@ -668,14 +668,14 @@ wheels = [
 
 [[package]]
 name = "reflex-chakra"
-version = "0.7.0"
+version = "0.7.1"
 source = { editable = "." }
 dependencies = [
     { name = "reflex" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "reflex", specifier = ">=0.7.0" }]
+requires-dist = [{ name = "reflex", specifier = ">=0.7.11" }]
 
 [[package]]
 name = "reflex-hosting-cli"

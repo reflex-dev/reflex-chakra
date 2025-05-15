@@ -1,6 +1,6 @@
 [project]
 name = "reflex-chakra"
-version = "0.7.0"
+version = "0.7.1"
 description = "reflex using chakra components"
 authors = [{ name = "Elijah Ahianyo", email = "elijahahianyo@gmail.com" }]
 maintainers = [
