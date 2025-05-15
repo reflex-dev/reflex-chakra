@@ -392,6 +392,6 @@ The `ButtonGroup` component is designed specifically for grouping buttons. It al
 
 
 
-```md alert
+```markdown alert
 # The `ButtonGroup` component stacks buttons horizontally, whereas the `Stack` component allows stacking buttons both vertically and horizontally.
 ```

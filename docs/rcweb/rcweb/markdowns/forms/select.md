@@ -1,6 +1,6 @@
 ---
 components:
-    - rc.Select
+  - rc.Select
 ---
 
 ```python exec
@@ -13,8 +13,7 @@ import reflex as rx
 The Select component is used to create a list of options, which allows a user to select one or more options from it.
 
 ```python demo exec
-from typing import List
-options: List[str] = ["Option 1", "Option 2", "Option 3"]
+options: list[str] = ["Option 1", "Option 2", "Option 3"]
 
 class SelectState(rx.State):
     option: str = "No selection yet."
@@ -27,30 +26,6 @@ def basic_select_example():
             options,
             placeholder="Select an example.",
             on_change=SelectState.set_option,
-            color_schemes="twitter",
-        ),
-    )
-```
-
-Select can also have multiple options selected at once.
-
-```python demo exec
-from typing import List
-options: List[str] = ["Option 1", "Option 2", "Option 3"]
-
-class MultiSelectState(rx.State):
-    option: List[str] = []
-
-
-def multiselect_example():
-    return rc.vstack(
-        rc.heading(MultiSelectState.option),
-        rc.select(
-            options, 
-            placeholder="Select examples", 
-            is_multi=True,
-            on_change=MultiSelectState.set_option,
-            close_menu_on_select=False,
             color_schemes="twitter",
         ),
     )
