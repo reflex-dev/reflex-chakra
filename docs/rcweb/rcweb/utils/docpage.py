@@ -12,7 +12,6 @@ from typing import (
     Sequence,
     Type,
     Literal,
-    _GenericAlias,
     Union,
     get_args,
     get_origin,
@@ -27,8 +26,6 @@ import flexdown
 import textwrap
 from reflex.base import Base
 from reflex.components.component import Component
-from reflex.components.radix.primitives.base import RadixPrimitiveComponent
-from reflex.components.radix.themes.base import RadixThemesComponent
 from reflex.components.base.fragment import Fragment
 from reflex.components.el.elements.base import BaseHTML
 import hashlib
@@ -805,160 +802,6 @@ class PropDocsState(rx.State):
     """Container for dynamic vars used by the prop docs."""
 
 
-EXCLUDED_COMPONENTS = [
-    "Theme",
-    "ThemePanel",
-    "DrawerRoot",
-    "DrawerTrigger",
-    "DrawerOverlay",
-    "DrawerPortal",
-    "DrawerContent",
-    "DrawerClose",
-]
-
-
-def render_select(prop, component, prop_dict):
-    if (
-        not rx.utils.types._issubclass(
-            component, (RadixThemesComponent, RadixPrimitiveComponent)
-        )
-        or component.__name__ in EXCLUDED_COMPONENTS
-    ):
-        return rx.fragment()
-    try:
-        type_ = rx.utils.types.get_args(prop.type_)[0]
-    except Exception:
-        return rx.fragment()
-
-    try:
-        if issubclass(type_, bool) and prop.name not in [
-            "open",
-            "checked",
-            "as_child",
-            "default_open",
-            "default_checked",
-        ]:
-            name = get_id(f"{component.__qualname__}_{prop.name}")
-            PropDocsState.add_var(name, bool, False)
-            var = getattr(PropDocsState, name)
-            setter = getattr(PropDocsState, f"set_{name}")
-            prop_dict[prop.name] = var
-            return rx.checkbox(
-                var,
-                on_change=setter,
-            )
-    except TypeError:
-        pass
-
-    if not isinstance(type_, _GenericAlias) or (
-        type_.__origin__ not in (Literal, Union)
-    ):
-        return rx.fragment()
-    # For the Union[Literal, Breakpoints] type
-    if type_.__origin__ is Union:
-        if not all(
-            arg.__name__ in ["Literal", "Breakpoints"] for arg in type_.__args__
-        ):
-            return rx.fragment()
-        else:
-            # Get the literal values
-            literal_values = [
-                str(lit_arg)
-                for arg in type_.__args__
-                if get_origin(arg) is Literal
-                for lit_arg in arg.__args__
-            ]
-            option = literal_values[0]
-            name = get_id(f"{component.__qualname__}_{prop.name}")
-            PropDocsState.add_var(name, str, option)
-            var = getattr(PropDocsState, name)
-            setter = getattr(PropDocsState, f"set_{name}")
-            prop_dict[prop.name] = var
-            return rx.select.root(
-                rx.select.trigger(class_name="w-32 font-small text-slate-11"),
-                rx.select.content(
-                    rx.select.group(
-                        *[
-                            rx.select.item(item, value=item, class_name="font-small")
-                            for item in literal_values
-                        ]
-                    )
-                ),
-                value=var,
-                on_change=setter,
-            )
-    # Get the first option.
-    option = type_.__args__[0]
-    name = get_id(f"{component.__qualname__}_{prop.name}")
-    PropDocsState.add_var(name, str, option)
-    var = getattr(PropDocsState, name)
-    setter = getattr(PropDocsState, f"set_{name}")
-    prop_dict[prop.name] = var
-
-    if prop.name == "color_scheme":
-        return rx.popover.root(
-            rx.popover.trigger(
-                rx.box(
-                    rx.button(
-                        rx.text(var, class_name="font-small"),
-                        # Match the select.trigger svg icon
-                        rx.html(
-                            """<svg width="9" height="9" viewBox="0 0 9 9" fill="currentcolor" xmlns="http://www.w3.org/2000/svg" class="rt-SelectIcon" aria-hidden="true"><path d="M0.135232 3.15803C0.324102 2.95657 0.640521 2.94637 0.841971 3.13523L4.5 6.56464L8.158 3.13523C8.3595 2.94637 8.6759 2.95657 8.8648 3.15803C9.0536 3.35949 9.0434 3.67591 8.842 3.86477L4.84197 7.6148C4.64964 7.7951 4.35036 7.7951 4.15803 7.6148L0.158031 3.86477C-0.0434285 3.67591 -0.0536285 3.35949 0.135232 3.15803Z"></path></svg>"""
-                        ),
-                        color_scheme=var,
-                        variant="surface",
-                        class_name="w-32 justify-between",
-                    ),
-                ),
-            ),
-            rx.popover.content(
-                rx.grid(
-                    *[
-                        rx.box(
-                            rx.icon(
-                                "check",
-                                size=15,
-                                display=rx.cond(var == color, "block", "none"),
-                                class_name="text-gray-12 absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]",
-                            ),
-                            bg=f"var(--{color}-9)",
-                            on_click=PropDocsState.setvar(f"{name}", color),
-                            border=rx.cond(
-                                var == color, "2px solid var(--gray-12)", ""
-                            ),
-                            class_name="relative shrink-0 rounded-md size-8 cursor-pointer",
-                        )
-                        for color in list(map(str, type_.__args__))
-                    ],
-                    columns="6",
-                    spacing="3",
-                ),
-            ),
-        )
-    return rx.select.root(
-        rx.select.trigger(class_name="font-small w-32 text-slate-11"),
-        rx.select.content(
-            rx.select.group(
-                *[
-                    rx.select.item(
-                        item,
-                        value=item,
-                        class_name="font-small",
-                        _hover=(
-                            {"background": f"var(--{item}-9)"}
-                            if prop.name == "color_scheme"
-                            else None
-                        ),
-                    )
-                    for item in list(map(str, type_.__args__))
-                ]
-            ),
-        ),
-        value=var,
-        on_change=setter,
-    )
-
-
 def hovercard(trigger: rx.Component, content: rx.Component) -> rx.Component:
     return rx.hover_card.root(
         rx.hover_card.trigger(
@@ -993,9 +836,7 @@ def color_scheme_hovercard(literal_values: list[str]) -> rx.Component:
     )
 
 
-def prop_docs(
-    prop: Prop, prop_dict, component, is_interactive: bool
-) -> list[rx.Component]:
+def prop_docs(prop: Prop) -> list[rx.Component]:
     """Generate the docs for a prop."""
     # Get the type of the prop.
     type_ = prop.type_
@@ -1160,12 +1001,6 @@ def prop_docs(
             ),
             class_name="justify-start pl-4",
         ),
-        rx.table.cell(
-            render_select(prop, component, prop_dict),
-            class_name="justify-start pl-4",
-        )
-        if is_interactive
-        else rx.fragment(),
     ]
 
 
@@ -1183,26 +1018,9 @@ def generate_props(src, component, comp):
 
     prop_dict = {}
 
-    is_interactive = True
-    if not rx.utils.types._issubclass(
-        component, (RadixThemesComponent, RadixPrimitiveComponent)
-    ) or component.__name__ in [
-        "Theme",
-        "ThemePanel",
-        "DrawerRoot",
-        "DrawerTrigger",
-        "DrawerOverlay",
-        "DrawerPortal",
-        "DrawerContent",
-        "DrawerClose",
-    ]:
-        is_interactive = False
-
     body = rx.table.body(
         *[
-            rx.table.row(
-                *prop_docs(prop, prop_dict, component, is_interactive), align="center"
-            )
+            rx.table.row(*prop_docs(prop), align="center")
             for prop in src.get_props()
             if not prop.name.startswith("on_")  # ignore event trigger props
         ],
@@ -1213,16 +1031,8 @@ def generate_props(src, component, comp):
         if f"{component.__name__}" in comp.metadata:
             comp = eval(comp.metadata[component.__name__])(**prop_dict)
 
-        elif not is_interactive:
-            comp = rx.fragment()
-
         else:
-            try:
-                comp = rx.vstack(component.create("Test", **prop_dict))
-            except Exception:
-                comp = rx.fragment()
-            if "data" in component.__name__.lower():
-                raise Exception("Data components cannot be created")
+            comp = rx.fragment()
     except Exception as e:
         print(f"Failed to create component {component.__name__}, error: {e}")
         comp = rx.fragment()
@@ -1258,9 +1068,7 @@ def generate_props(src, component, comp):
                         rx.table.column_header_cell(
                             "Interactive",
                             class_name=table_header_class_name,
-                        )
-                        if is_interactive
-                        else rx.fragment(),
+                        ),
                     ),
                     class_name="bg-slate-3",
                 ),
