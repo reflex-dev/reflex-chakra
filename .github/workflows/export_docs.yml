@@ -20,7 +20,7 @@ jobs:
           activate-environment: true
       - name: Install Reflex
         working-directory: ./docs/rcweb
-        run: uv pip install $(grep -ivE "reflex-chakra " requirements.txt)
+        run: uv pip install $(grep -ivE "reflex-chakra" requirements.txt)
 
       - name: Initialize Reflex
         working-directory: ./docs/rcweb
