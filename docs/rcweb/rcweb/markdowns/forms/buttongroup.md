@@ -130,7 +130,7 @@ The `spacing` prop allows you to control the gap between buttons within the grou
 
 By setting `spacing` to `8`, the buttons will have a larger gap between them.
 
-```md alert info
+```markdown alert info
 - You can nest other components or elements within the button group to create more complex layouts.
 - Button groups are a useful way to visually organize related actions or options in your application, providing a consistent and cohesive user interface.
 - Experiment with different combinations of props to achieve the desired styling and behavior for your button groups in Reflex-based applications.

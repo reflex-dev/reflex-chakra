@@ -9,7 +9,7 @@ This library leverages the power of both Reflex and Chakra UI to offer a seamles
 
 To get started with `reflex-chakra`, you need to install the library using pip. Run the following command in your terminal:
 
-```sh
+```bash
 pip install reflex-chakra
 ```
 

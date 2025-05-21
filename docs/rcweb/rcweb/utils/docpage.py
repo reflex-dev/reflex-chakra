@@ -1,20 +1,38 @@
-import reflex as rx
-import reflex_chakra as rc
-from typing import Callable, Type, Any, Literal, Union, get_origin, get_args
+"""Utility functions for the component docs page."""
+
+from collections.abc import Callable
+import functools
 import inspect
-import flexdown
-from reflex.components.el.elements.base import BaseHTML
+import reflex_chakra as rc
 import os
+import re
+from types import UnionType
+from typing import (
+    Any,
+    Sequence,
+    Type,
+    Literal,
+    Union,
+    get_args,
+    get_origin,
+)
+import mistletoe
 from ..utils.flexdown import xd, markdown, docdemobox
 from ..utils.sidebar import sidebar as sb
 from ..utils.sidebar import MobileAndTabletSidebarState
-from ..constants import css, fonts
+from ..utils.blocks.headings import h2_comp, h1_comp
+import reflex as rx
+import flexdown
 import textwrap
-import mistletoe
-from reflex.style import toggle_color_mode
+from reflex.base import Base
+from reflex.components.component import Component
+from reflex.components.base.fragment import Fragment
+from reflex.components.el.elements.base import BaseHTML
+import hashlib
 
 flat_items = []
 
+# Mapping from types to colors.
 TYPE_COLORS = {
     "int": "red",
     "float": "orange",
@@ -38,7 +56,7 @@ EVENTS = {
         "description": "Function or event handler called when focus has left the element (or left some element inside of it). For example, it is called when the user clicks outside of a focused text input."
     },
     "on_change": {
-        "description": "Function or event handler called when the value of an element has changed. For example, it is called when the user types into a text input each keystoke triggers the on change."
+        "description": "Function or event handler called when the value of an element has changed. For example, it is called when the user types into a text input each keystroke triggers the on change."
     },
     "on_click": {
         "description": "Function or event handler called when the user clicks on an element. For example, it’s called when the user clicks on a button."
@@ -142,6 +160,12 @@ EVENTS = {
     "on_paste": {
         "description": "The on_paste event handler is called when the user pastes text into the editor. It receives the clipboard data and max character count as arguments.",
     },
+    "on_animation_start": {
+        "description": "The on_animation_start event handler is called when the animation starts. It receives the animation name as an argument.",
+    },
+    "on_animation_end": {
+        "description": "The on_animation_end event handler is called when the animation ends. It receives the animation name as an argument.",
+    },
     "toggle_code_view": {
         "description": "The toggle_code_view event handler is called when the user toggles code view. It receives a boolean whether code view is active.",
     },
@@ -208,9 +232,6 @@ EVENTS = {
     "on_open_auto_focus": {
         "description": "The on_open_auto_focus event handler is called when the component opens and the focus is returned to the first item."
     },
-    "on_change": {
-        "description": "The on_change event handler is called when the value or checked state of the component changes."
-    },
     "on_value_change": {
         "description": "The on_change event handler is called when the value state of the component changes."
     },
@@ -235,6 +256,26 @@ EVENTS = {
     "on_drop": {
         "description": "The on_drop event handler is called when the user drops an item."
     },
+    "get_server_side_group_key": {"description": "Get the server side group key."},
+    "is_server_side_group_open_by_default": {
+        "description": "Event handler to check if the server-side group is open by default."
+    },
+    "get_child_count": {"description": "Event handler to get the child count."},
+    "on_selection_changed": {
+        "description": "The on_selection_changed event handler is called when the selection changes."
+    },
+    "on_first_data_rendered": {
+        "description": "The on_first_data_rendered event handler is called when the first data is rendered."
+    },
+    "get_row_id": {
+        "description": "The get_row_id event handler is called to get the row id."
+    },
+    "get_data_path": {
+        "description": "The get_data_path event handler is called to get the data path."
+    },
+    "is_server_side_group": {
+        "description": "The is_server_side_group event handler is called to check if the group is server-side."
+    },
 }
 
 
@@ -243,12 +284,9 @@ def get_prev_next(url):
     url = url.strip("/")
     for i, item in enumerate(flat_items):
         if item.link.strip("/") == url:
-            if i == 0:
-                return None, flat_items[i + 1]
-            elif i == len(flat_items) - 1:
-                return flat_items[i - 1], None
-            else:
-                return flat_items[i - 1], flat_items[i + 1]
+            prev_link = flat_items[i - 1] if i > 0 else None
+            next_link = flat_items[i + 1] if i < len(flat_items) - 1 else None
+            return prev_link, next_link
     return None, None
 
 
@@ -267,13 +305,48 @@ def get_default_value(lines: list[str], start_index: int) -> str:
     if start_index > 0:
         comment_line = lines[start_index - 1].strip()
         if comment_line.startswith("#"):
-            default_match = re.search(r'Default:\s*(["\']?\w+["\']?|\w+)', comment_line)
+            default_match = re.search(r"Default:\s*(.+)$", comment_line)
             if default_match:
-                default_value = default_match.group(1)
+                default_value = default_match.group(1).strip()
                 return default_value
 
+    # Get the initial line
+    line = lines[start_index]
+    parts = line.split("=", 1)
+    if len(parts) != 2:
+        return ""
+    value = parts[1].strip()
 
-class Prop(rx.Base):
+    # Check if the value is complete
+    open_brackets = value.count("{") - value.count("}")
+    open_parentheses = value.count("(") - value.count(")")
+
+    # If brackets or parentheses are not balanced, collect more lines
+    current_index = start_index + 1
+    while (open_brackets > 0 or open_parentheses > 0) and current_index < len(lines):
+        next_line = lines[current_index].strip()
+        value += " " + next_line
+        open_brackets += next_line.count("{") - next_line.count("}")
+        open_parentheses += next_line.count("(") - next_line.count(")")
+        current_index += 1
+
+    # Remove any trailing comments
+    value = re.split(r"\s+#", value)[0].strip()
+
+    # Process Var.create_safe within dictionary
+    def process_var_create_safe(match):
+        content = match.group(1)
+        # Extract only the first argument
+        first_arg = re.split(r",", content)[0].strip()
+        return first_arg
+
+    value = re.sub(r"Var\.create_safe\((.*?)\)", process_var_create_safe, value)
+    value = re.sub(r"\bColor\s*\(", "rx.color(", value)
+
+    return value.strip()
+
+
+class Prop(Base):
     """Hold information about a prop."""
 
     # The name of the prop.
@@ -289,7 +362,7 @@ class Prop(rx.Base):
     default_value: str
 
 
-class Route(rx.Base):
+class Route(Base):
     """A page route."""
 
     # The path of the route.
@@ -297,6 +370,15 @@ class Route(rx.Base):
 
     # The page title.
     title: str | None = None
+
+    # The page description.
+    description: str | None = None
+
+    # The page image.
+    image: str | None = None
+
+    # The page extra meta data.
+    meta: list[dict[str, str]] | None = None
 
     # Background color for the page.
     background_color: str | None = None
@@ -308,6 +390,9 @@ class Route(rx.Base):
     # to delay adding the 404 page(which is explicitly added in pcweb.py).
     # https://github.com/reflex-dev/reflex-web/pull/659#pullrequestreview-2021171902
     add_as_page: bool = True
+
+    def __hash__(self):
+        return hash(f"{self.path}-{self.title}")
 
 
 def get_path(component_fn: Callable):
@@ -325,26 +410,14 @@ def get_path(component_fn: Callable):
     )
 
 
-def mobile_and_tablet(*children, **props):
-    """Create a component that is only visible on mobile and tablet.
-
-        Args:
-            *children: The children to pass to the component.
-            **props: The props to pass to the component.
-
-        Returns:
-            The component.
-        """
-
-    return rx.box(*children, **props, display=["inline", "inline", "inline", "none"])
-
-
 def docpage(
     set_path: str | None = None,
     t: str | None = None,
     right_sidebar: bool = True,
+    page_title: str | None = None,
+    pseudo_right_bar: bool = False,
     chakra_components={},
-) -> rx.Component:
+):
     """A template that most pages on the reflex.dev site should use.
 
     This template wraps the webpage with the navbar and footer.
@@ -371,6 +444,7 @@ def docpage(
         # Set the page title.
         title = contents.__name__.replace("_", " ").title() if t is None else t
 
+        @functools.wraps(contents)
         def wrapper(*args, **kwargs) -> rx.Component:
             """The actual function wrapper.
 
@@ -382,7 +456,7 @@ def docpage(
                 The page with the template applied.
             """
             # Create the docpage sidebar.
-            sidebar = sb(url=path, width="280px", chakra_components=chakra_components)
+            sidebar = sb(url=path, width="300px", chakra_components=chakra_components)
             # # Get the previous and next sidebar links.
             prev, next = get_prev_next(path)
             links = []
@@ -395,48 +469,24 @@ def docpage(
                     else prev.names
                 )
                 links.append(
-                    rx.link(
-                        rx.hstack(
-                            # get_icon(icon="arrow_right", transform="rotate(180deg)"),
-                            rx.icon("arrow_right"),
-                            next_prev_name,
-                            align_items="center",
-                            gap="8px",
-                            width="100%",
-                            justify_content=[
-                                "center",
-                                "center",
-                                "flex-start",
-                                "flex-start",
-                                "flex-start",
-                            ],
-                            border_radius="8px",
+                    rx.box(
+                        rx.link(
+                            rx.box(
+                                "Back",
+                                class_name="flex flex-row justify-center lg:justify-start items-center gap-2 rounded-lg w-full",
+                            ),
+                            underline="none",
+                            href=prev.link,
+                            class_name="py-0.5 lg:py-0 rounded-lg lg:w-auto font-small text-slate-9 hover:!text-slate-11 transition-color",
                         ),
-                        underline="none",
-                        href=prev.link,
-                        _hover={"color": rx.color("slate", 11)},
-                        transition="color 0.035s ease-out",
-                        background_color=[
-                            rx.color("slate", 3),
-                            rx.color("slate", 3),
-                            "transparent",
-                            "transparent",
-                            "transparent",
-                        ],
-                        border_radius="8px",
-                        padding=["2px 6px", "2px 6px", "0px", "0px", "0px"],
-                        style={
-                            "color": rx.color("slate", 9),
-                            **fonts.small,
-                            ":hover": {"color": rx.color("slate", 11)},
-                        },
-                        width=["100%", "100%", "auto", "auto", "auto"],
+                        rx.text(next_prev_name, class_name="font-smbold text-slate-12"),
+                        class_name="flex flex-col justify-start gap-1",
                     )
                 )
             else:
-                links.append(rx.box())
-            # links.append(rx.box())
-            # Create the next component link.
+                links.append(rx.fragment())
+            links.append(rx.spacer())
+
             if next:
                 next_prev_name = (
                     next.alt_name_for_next_prev
@@ -444,46 +494,23 @@ def docpage(
                     else next.names
                 )
                 links.append(
-                    rx.link(
-                        rx.hstack(
-                            next_prev_name,
-                            # get_icon(icon="arrow_right"),
-                            rx.icon("arrow_right"),
-                            align_items="center",
-                            gap="8px",
-                            width="100%",
-                            justify_content=[
-                                "center",
-                                "center",
-                                "flex-end",
-                                "flex-end",
-                                "flex-end",
-                            ],
-                            background_color=[
-                                rx.color("slate", 3),
-                                rx.color("slate", 3),
-                                "transparent",
-                                "transparent",
-                                "transparent",
-                            ],
-                            padding=["2px 6px", "2px 6px", "0px", "0px", "0px"],
-                            border_radius="8px",
+                    rx.box(
+                        rx.link(
+                            rx.box(
+                                "Next",
+                                class_name="flex flex-row lg:justify-start items-center gap-2 rounded-lg w-full self-end",
+                            ),
+                            underline="none",
+                            href=next.link,
+                            class_name="py-0.5 lg:py-0 rounded-lg lg:w-auto font-small text-slate-9 hover:!text-slate-11 transition-color",
                         ),
-                        underline="none",
-                        href=next.link,
-                        _hover={"color": rx.color("slate", 11)},
-                        transition="color 0.035s ease-out",
-                        style={
-                            "color": rx.color("slate", 9),
-                            **fonts.small,
-                            ":hover": {"color": rx.color("slate", 11)},
-                        },
-                        width=["100%", "100%", "auto", "auto", "auto"],
-                    ),
+                        rx.text(next_prev_name, class_name="font-smbold text-slate-12"),
+                        class_name="flex flex-col justify-start gap-1 items-end",
+                    )
                 )
             else:
-                links.append(rx.box())
-            # links.append(rx.box())
+                links.append(rx.fragment())
+
             toc = []
             if not isinstance(contents, rx.Component):
                 comp = contents(*args, **kwargs)
@@ -493,8 +520,11 @@ def docpage(
             if isinstance(comp, tuple):
                 toc, comp = comp
 
-            # Return the templated page.
-            return rx.flex(
+            show_right_sidebar = right_sidebar and len(toc) >= 2
+
+            main_content_width = " lg:w-[60%]" if show_right_sidebar else " lg:w-full"
+
+            return rx.box(
                 # navbar
                 rc.flex(
                     rc.box(
@@ -508,15 +538,16 @@ def docpage(
                                         "moon", size=16, class_name="!text-slate-9"
                                     ),
                                 ),
-                                on_click=toggle_color_mode,
+                                on_click=rx.toggle_color_mode,
                                 class_name="flex flex-row justify-center items-center px-3 py-0.5 w-full h-[47px]",
                             ),
-                            float="right"
+                            float="right",
                         ),
-                        mobile_and_tablet(
+                        rx.mobile_and_tablet(
                             rc.icon_button(
-                                rx.icon("menu"), on_click=MobileAndTabletSidebarState.toggle_drawer,
-                                float="right"
+                                rx.icon("menu"),
+                                on_click=MobileAndTabletSidebarState.toggle_drawer,
+                                float="right",
                             ),
                         ),
                         justify="space-between",
@@ -527,199 +558,97 @@ def docpage(
                     width="100%",
                     justify="center",
                 ),
-
-
                 rx.el.main(
                     rx.box(
                         sidebar,
-                        height="100%",
-                        width="24%",
-                        display=["none", "none", "none", "none", "flex", "flex"],
-                        flex_shrink=0,
+                        class_name="h-full shrink-0 desktop-only lg:w-[24%]",
                     ),
                     rx.box(
                         rx.box(
-                            # breadcrumb(path, nav_sidebar),
-                            padding_x=[
-                                "0px",
-                                "0px",
-                                "0px",
-                                "48px",
-                                "96px",
-                            ],
+                            class_name="px-0 lg:px-20 pt-11 sm:pt-0",
                         ),
                         rx.box(
                             rx.el.article(comp),
                             rx.el.nav(
                                 *links,
-                                justify="between",
-                                margin_top=["32px", "32px", "40px", "40px", "40px"],
-                                margin_bottom=[
-                                    "24px",
-                                    "24px",
-                                    "24pxpx",
-                                    "48px",
-                                    "48px",
-                                ],
-                                gap="8px",
-                                display="flex",
-                                flex_direction="row",
-                                justify_content="space-between",
+                                class_name="flex flex-row gap-2 mt-8 lg:mt-10 mb-6 lg:mb-12",
                             ),
-                            # docpage_footer(path=path),
-                            padding_x=["16px", "24px", "24px", "48px", "96px"],
-                            margin_top=["0px", "0px", "0px", "0px", "0px"],
-                            padding_top="5em",
+                            class_name="lg:mt-0 mt-6 px-4 lg:px-20",
                         ),
-                        width=(
-                            ["100%", "100%", "100%", "90%", "70%", "60%"]
-                            if right_sidebar
-                            else "100%"
-                        ),
-                        height="100%",
+                        class_name="h-full w-full" + main_content_width,
                     ),
-                    rx.el.nav(
-                        rx.flex(
-                            rx.heading(
-                                "On this page",
-                                as_="h5",
-                                style={
-                                    "color": rx.color("slate", 12),
-                                    "font-family": "Instrument Sans",
-                                    "font-size": "14px",
-                                    "font-style": "normal",
-                                    "font-weight": "600",
-                                    "line-height": "20px",
-                                    "letter-spacing": "-0.21px",
-                                },
-                            ),
-                            rx.unordered_list(
-                                *[
-                                    (
-                                        rx.list_item(
-                                            rx.link(
-                                                text,
-                                                style={
-                                                    "transition": "color 0.035s ease-out",
-                                                    "color": rx.color("slate", 9),
-                                                    "overflow": "hidden",
-                                                    "text-overflow": "ellipsis",
-                                                    "white-space": "nowrap",
-                                                    **fonts.small,
-                                                    ":hover": {
-                                                        "color": rx.color("slate", 11),
-                                                    },
-                                                },
-                                                _hover={
-                                                    "color": rx.color("slate", 11),
-                                                },
-                                                underline="none",
-                                                href=path
-                                                + "#"
-                                                + text.lower().replace(" ", "-"),
-                                            )
-                                        )
-                                        if level == 1
-                                        else (
-                                            rx.list_item(
+                    (
+                        rx.el.nav(
+                            rx.box(
+                                rx.el.h5(
+                                    "On this page",
+                                    class_name="font-smbold text-[0.875rem] text-slate-12 hover:text-violet-9 leading-5 tracking-[-0.01313rem] transition-color",
+                                ),
+                                rx.el.ul(
+                                    *[
+                                        (
+                                            rx.el.li(
                                                 rx.link(
                                                     text,
-                                                    style={
-                                                        "transition": "color 0.035s ease-out",
-                                                        "overflow": "hidden",
-                                                        "text-overflow": "ellipsis",
-                                                        "white-space": "nowrap",
-                                                        "color": rx.color("slate", 9),
-                                                        **fonts.small,
-                                                        ":hover": {
-                                                            "color": rx.color(
-                                                                "slate", 11
-                                                            ),
-                                                        },
-                                                    },
-                                                    _hover={
-                                                        "color": rx.color("slate", 11),
-                                                    },
+                                                    class_name="font-small text-slate-9 hover:!text-slate-11 whitespace-normal transition-color",
                                                     underline="none",
                                                     href=path
                                                     + "#"
                                                     + text.lower().replace(" ", "-"),
                                                 )
                                             )
-                                            if level == 2
-                                            else rx.list_item(
-                                                rx.link(
-                                                    text,
-                                                    style={
-                                                        "transition": "color 0.035s ease-out",
-                                                        "overflow": "hidden",
-                                                        "text-overflow": "ellipsis",
-                                                        "white-space": "nowrap",
-                                                        "color": rx.color("slate", 9),
-                                                        **fonts.small,
-                                                        ":hover": {
-                                                            "color": rx.color(
-                                                                "slate", 11
-                                                            ),
-                                                        },
-                                                    },
-                                                    _hover={
-                                                        "color": rx.color("slate", 11),
-                                                    },
-                                                    underline="none",
-                                                    padding_left="24px",
-                                                    href=path
-                                                    + "#"
-                                                    + text.lower().replace(" ", "-"),
+                                            if level == 1
+                                            else (
+                                                rx.list_item(
+                                                    rx.link(
+                                                        text,
+                                                        class_name="font-small text-slate-9 hover:!text-slate-11 whitespace-normal transition-color",
+                                                        underline="none",
+                                                        href=path
+                                                        + "#"
+                                                        + text.lower().replace(
+                                                            " ", "-"
+                                                        ),
+                                                    )
+                                                )
+                                                if level == 2
+                                                else rx.el.li(
+                                                    rx.link(
+                                                        text,
+                                                        underline="none",
+                                                        class_name="pl-6 font-small text-slate-9 hover:!text-slate-11  transition-color",
+                                                        href=path
+                                                        + "#"
+                                                        + text.lower().replace(
+                                                            " ", "-"
+                                                        ),
+                                                    )
                                                 )
                                             )
                                         )
-                                    )
-                                    for level, text in toc
-                                ],
-                                list_style_type="none",
-                                display="flex",
-                                gap="16px",
-                                flex_direction="column",
-                                margin_left="0px !important",
+                                        for level, text in toc
+                                    ],
+                                    class_name="flex flex-col gap-4 list-none",
+                                ),
+                                class_name="fixed flex flex-col justify-start gap-4 p-[0.875rem_0.5rem_0px_0.5rem] max-h-[80vh] overflow-y-scroll",
+                                style={"width": "inherit"},
                             ),
-                            direction="column",
-                            width="100%",
-                            position="fixed",
-                            gap="16px",
-                            padding="14px 8px 0px 8px",
-                            max_width="280px",
-                            justify="start",
-                            overflow="hidden",
-                            max_height="80vh",
-                            overflow_y="scroll",
-                        ),
-                        width="18%",
-                        height="100%",
-                        display=(
-                            ["none", "none", "none", "none", "none", "flex"]
-                            if right_sidebar
-                            else "none"
-                        ),
-                        flex_shrink=0,
+                            class_name="shrink-0 w-[16%]"
+                            + (
+                                " hidden xl:flex xl:flex-col"
+                                if show_right_sidebar and not pseudo_right_bar
+                                else " hidden"
+                            ),
+                            id="toc-navigation",
+                        )
+                        if not pseudo_right_bar or show_right_sidebar
+                        else rx.spacer()
                     ),
-                    max_width="110em",
-                    margin_left="auto",
-                    margin_right="auto",
-                    margin_top="0px",
-                    height="100%",
-                    min_height="100vh",
-                    width="100%",
-                    display="flex",
-                    flex_direction="row",
+                    class_name="justify-center flex flex-row mx-auto mt-0 max-w-[94.5em] h-full min-h-screen w-full",
                 ),
-                background=rx.color("slate", 1),
-                width="100%",
-                justify="center",
-                flex_direction="column",
+                class_name="flex flex-col justify-center bg-slate-1 w-full",
             )
 
-        # Return the route.
         components = path.split("/")
         category = (
             " ".join(
@@ -728,6 +657,12 @@ def docpage(
             if len(components) > 2
             else None
         )
+        if page_title:
+            return Route(
+                path=path,
+                title=page_title,
+                component=wrapper,
+            )
         return Route(
             path=path,
             title=f"{title} · Reflex Docs" if category is None else title,
@@ -737,14 +672,11 @@ def docpage(
     return docpage
 
 
-import re
-
-
-class Source(rx.Base):
+class Source(Base):
     """Parse the source code of a component."""
 
     # The component to parse.
-    component: Type[rx.Component]
+    component: Type[Component]
 
     # The source code.
     code: list[str] = []
@@ -768,7 +700,7 @@ class Source(rx.Base):
         """
         return self.component.__doc__
 
-    def get_props(self):
+    def get_props(self) -> list[Prop]:
         """Get a dictionary of the props and their descriptions.
 
         Returns:
@@ -778,11 +710,17 @@ class Source(rx.Base):
 
         parent_cls = self.component.__bases__[0]
         if parent_cls != rx.Component and parent_cls != BaseHTML:
-            props += Source(component=parent_cls).get_props()
+            parent_props = Source(component=parent_cls).get_props()
+            # filter out the props that have been overridden in the parent class.
+            props += [
+                prop
+                for prop in parent_props
+                if prop.name not in {p.name for p in props}
+            ]
 
         return props
 
-    def _get_props(self):
+    def _get_props(self) -> list[Prop]:
         """Get a dictionary of the props and their descriptions.
 
         Returns:
@@ -814,19 +752,20 @@ class Source(rx.Base):
 
             if i > 0:
                 comment_above = self.code[i - 1].strip()
-                assert comment_above.startswith(
-                    "#"
-                ), f"Expected comment, got {comment_above}"
+                assert comment_above.startswith("#"), (
+                    f"Expected comment, got {comment_above}"
+                )
 
             comment = Source.get_comment(comments)
             comments.clear()
 
             type_ = self.component.get_fields()[prop].outer_type_
+
             out.append(
                 Prop(
                     name=prop,
                     type_=type_,
-                    default_value=default_value if default_value else "",
+                    default_value=default_value,
                     description=comment,
                 )
             )
@@ -841,10 +780,26 @@ class Source(rx.Base):
 def get_code_style(color: str):
     return {
         "color": rx.color(color, 11),
-        "border_radius": "4px",
+        "border_radius": "0.25rem",
         "border": f"1px solid {rx.color(color, 5)}",
         "background": rx.color(color, 3),
     }
+
+
+count = 0
+
+
+def get_id(s):
+    global count
+    count += 1
+    s = str(count)
+    hash_object = hashlib.sha256(s.encode())
+    hex_dig = hash_object.hexdigest()
+    return "a_" + hex_dig[:8]
+
+
+class PropDocsState(rx.State):
+    """Container for dynamic vars used by the prop docs."""
 
 
 def hovercard(trigger: rx.Component, content: rx.Component) -> rx.Component:
@@ -856,24 +811,19 @@ def hovercard(trigger: rx.Component, content: rx.Component) -> rx.Component:
             content,
             side="top",
             align="center",
-            color=rx.color("slate", 9),
-            style=fonts.small,
+            class_name="font-small text-slate-11",
         ),
     )
 
 
 def color_scheme_hovercard(literal_values: list[str]) -> rx.Component:
     return hovercard(
-        rx.icon(tag="palette", size=15, color=rx.color("slate", 9), flex_shrink=0),
+        rx.icon(tag="palette", size=15, class_name="!text-slate-9 shrink-0"),
         rx.grid(
             *[
                 rx.tooltip(
                     rx.box(
-                        width="30px",
-                        height="30px",
-                        border_radius="max(var(--radius-2), var(--radius-full))",
-                        flex_shrink=0,
-                        bg=f"var(--{color}-9)",
+                        bg=f"var(--{color}-9)", class_name="rounded-md size-8 shrink-0"
                     ),
                     content=color,
                     delay_duration=0,
@@ -886,9 +836,7 @@ def color_scheme_hovercard(literal_values: list[str]) -> rx.Component:
     )
 
 
-def prop_docs(
-    prop: Prop, prop_dict, component, is_interactive: bool
-) -> list[rx.Component]:
+def prop_docs(prop: Prop) -> list[rx.Component]:
     """Generate the docs for a prop."""
     # Get the type of the prop.
     type_ = prop.type_
@@ -901,10 +849,12 @@ def prop_docs(
 
     literal_values = []  # Literal values of the prop
     all_types = []  # List for all the prop types
-    MAX_PROP_VALUES = 3
+    MAX_PROP_VALUES = 2
+
+    short_type_name = None
 
     COMMON_TYPES = {}  # Used to exclude common types from the MAX_PROP_VALUES
-    if origin is Union:
+    if origin in (Union, UnionType):
         non_literal_types = []  # List for all the non-literal types
 
         for arg in args:
@@ -929,10 +879,15 @@ def prop_docs(
                 else f"Union[Literal, {', '.join(non_literal_types)}]"
             )
 
+        short_type_name = "Union"
+
     elif origin is dict:
         key_type = args[0].__name__ if args else "Any"
-        value_type = args[1].__name__ if len(args) > 1 else "Any"
+        value_type = (
+            getattr(args[1], "__name__", str(args[1])) if len(args) > 1 else "Any"
+        )
         type_name = f"Dict[{key_type}, {value_type}]"
+        short_type_name = "Dict"
 
     elif origin is Literal:
         literal_values = list(map(str, args))
@@ -940,33 +895,35 @@ def prop_docs(
             type_name = "Literal"
         else:
             type_name = " | ".join([f'"{value}"' for value in literal_values])
+        short_type_name = "Literal"
 
     else:
         type_name = type_.__name__
+        short_type_name = type_name
 
     # Get the default value.
     default_value = prop.default_value if prop.default_value is not None else "-"
     # Get the color of the prop.
-    color = TYPE_COLORS.get(type_.__name__, "gray")
+    color = TYPE_COLORS.get(short_type_name, "gray")
     # Return the docs for the prop.
     return [
         rx.table.cell(
-            rx.hstack(
-                rx.code(prop.name, text_wrap="nowrap", style=get_code_style("violet")),
+            rx.box(
+                rx.code(prop.name, class_name="code-style text-nowrap leading-normal"),
                 hovercard(
                     rx.icon(
-                        tag="info", size=15, color=rx.color("slate", 9), flex_shrink=0
+                        tag="info",
+                        size=15,
+                        class_name="!text-slate-9 shrink-0",
                     ),
-                    rx.text(prop.description, size="2"),
+                    rx.text(prop.description, class_name="font-small text-slate-11"),
                 ),
-                spacing="2",
-                align="center",
+                class_name="flex flex-row items-center gap-2",
             ),
-            padding_left="1em",
-            justify="start",
+            class_name="justify-start pl-4",
         ),
         rx.table.cell(
-            rx.hstack(
+            rx.box(
                 rx.cond(
                     (len(literal_values) > 0) & (prop.name not in COMMON_TYPES),
                     rx.code(
@@ -978,15 +935,13 @@ def prop_docs(
                             if len(literal_values) > MAX_PROP_VALUES
                             else type_name
                         ),
-                        # color_scheme=color,
                         style=get_code_style(color),
-                        text_wrap="nowrap",
+                        class_name="code-style text-nowrap leading-normal",
                     ),
                     rx.code(
                         type_name,
-                        # color_scheme=color,
                         style=get_code_style(color),
-                        text_wrap="nowrap",
+                        class_name="code-style text-nowrap leading-normal",
                     ),
                 ),
                 rx.cond(
@@ -996,11 +951,11 @@ def prop_docs(
                         rx.icon(
                             tag="circle-ellipsis",
                             size=15,
-                            color=rx.color("slate", 9),
-                            flex_shrink=0,
+                            class_name="!text-slate-9 shrink-0",
                         ),
                         rx.text(
-                            " | ".join([f'"{v}"' for v in literal_values]), size="2"
+                            " | ".join([f'"{v}"' for v in literal_values]),
+                            class_name="font-small text-slate-11",
                         ),
                     ),
                 ),
@@ -1013,24 +968,24 @@ def prop_docs(
                         rx.icon(
                             tag="info",
                             size=15,
-                            color=rx.color("slate", 9),
-                            flex_shrink=0,
+                            class_name="!text-slate-9 shrink-0",
                         ),
-                        rx.text(f"Union[{', '.join(all_types)}]", size="2"),
+                        rx.text(
+                            f"Union[{', '.join(all_types)}]",
+                            class_name="font-small text-slate-11",
+                        ),
                     ),
                 ),
                 rx.cond(
                     (prop.name == "color_scheme") | (prop.name == "accent_color"),
                     color_scheme_hovercard(literal_values),
                 ),
-                spacing="2",
-                align="center",
+                class_name="flex flex-row items-center gap-2",
             ),
-            padding_left="1em",
-            justify="start",
+            class_name="justify-start pl-4",
         ),
         rx.table.cell(
-            rx.flex(
+            rx.box(
                 rx.code(
                     default_value,
                     style=get_code_style(
@@ -1040,63 +995,53 @@ def prop_docs(
                         if default_value == "True"
                         else "gray"
                     ),
-                    text_wrap="nowrap",
-                )
+                    class_name="code-style leading-normal text-nowrap",
+                ),
+                class_name="flex",
             ),
-            padding_left="1em",
-            justify="start",
+            class_name="justify-start pl-4",
         ),
     ]
 
 
-def generate_props(src: Source, component, comp):
+def generate_props(src, component, comp):
     if len(src.get_props()) == 0:
-        return rx.vstack(
-            rx.heading("Props", as_="h3"),
-            rx.text("No component specific props"),
-            width="100%",
-            overflow_x="auto",
-            align_items="start",
-            padding_y=".5em",
+        return rx.box(
+            rx.heading("Props", as_="h3", class_name="font-large text-slate-12"),
+            rx.text("No component specific props", class_name="text-slate-9 font-base"),
+            class_name="flex flex-col overflow-x-auto justify-start py-2 w-full",
         )
 
-    padding_left = "1em"
+    table_header_class_name = (
+        "font-small text-slate-12 text-normal w-auto justify-start pl-4 font-bold"
+    )
 
     prop_dict = {}
 
-    is_interactive = False
-
     body = rx.table.body(
         *[
-            rx.table.row(
-                *prop_docs(prop, prop_dict, component, is_interactive), align="center"
-            )
+            rx.table.row(*prop_docs(prop), align="center")
             for prop in src.get_props()
             if not prop.name.startswith("on_")  # ignore event trigger props
         ],
-        background=rx.color("slate", 2),
+        class_name="bg-slate-2",
     )
 
     try:
         if f"{component.__name__}" in comp.metadata:
             comp = eval(comp.metadata[component.__name__])(**prop_dict)
 
-        elif not is_interactive:
-            comp = rx.fragment()
-
         else:
-            try:
-                comp = rx.vstack(component.create("Test", **prop_dict))
-            except:
-                comp = rx.fragment()
-            if "data" in component.__name__.lower():
-                raise Exception("Data components cannot be created")
+            comp = rx.fragment()
     except Exception as e:
         print(f"Failed to create component {component.__name__}, error: {e}")
         comp = rx.fragment()
 
+    interactive_component = (
+        docdemobox(comp) if not isinstance(comp, Fragment) else "",
+    )
     return rx.vstack(
-        docdemobox(comp) if not isinstance(comp, rx.Fragment) else "",
+        interactive_component,
         rx.scroll_area(
             rx.table.root(
                 rx.el.style(
@@ -1110,48 +1055,29 @@ def generate_props(src: Source, component, comp):
                     rx.table.row(
                         rx.table.column_header_cell(
                             "Prop",
-                            padding_left=padding_left,
-                            justify="start",
-                            text_wrap="nowrap",
-                            width="auto",
+                            class_name=table_header_class_name,
                         ),
                         rx.table.column_header_cell(
                             "Type | Values",
-                            padding_left=padding_left,
-                            justify="start",
-                            text_wrap="nowrap",
-                            width="auto",
+                            class_name=table_header_class_name,
                         ),
                         rx.table.column_header_cell(
                             "Default",
-                            padding_left=padding_left,
-                            justify="start",
-                            text_wrap="nowrap",
-                            width="auto",
+                            class_name=table_header_class_name,
                         ),
-                        rx.cond(
-                            is_interactive,
-                            rx.table.column_header_cell(
-                                "Interactive",
-                                padding_left=padding_left,
-                                justify="start",
-                                text_wrap="nowrap",
-                                width="auto",
-                            ),
-                            rx.fragment(),
+                        rx.table.column_header_cell(
+                            "Interactive",
+                            class_name=table_header_class_name,
                         ),
                     ),
-                    background=rx.color("slate", 3),
+                    class_name="bg-slate-3",
                 ),
                 body,
-                width="100%",
-                padding_x="0",
                 variant="surface",
                 size="1",
-                border=f"1px solid {rx.color('slate', 4)}",
+                class_name="px-0 w-full border border-slate-4",
             ),
-            max_height="25em",
-            margin_bottom="16px",
+            class_name="max-h-96 mb-4",
         ),
     )
 
@@ -1161,36 +1087,37 @@ def generate_valid_children(comp):
         return rx.text("")
 
     valid_children = [
-        rc.wrap_item(rx.code(child, style=get_code_style("violet")))
+        rx.code(child, class_name="code-style leading-normal")
         for child in comp._valid_children
     ]
-    return rx.vstack(
-        rx.heading("Valid Children", as_="h3", style=fonts.large),
-        rc.wrap(*valid_children),
-        width="100%",
-        align_items="start",
-        padding_bottom="24px",
+    return rx.box(
+        rx.heading("Valid Children", as_="h3", class_name="font-large text-slate-12"),
+        rx.box(*valid_children, class_name="flex flex-row gap-2 flex-wrap"),
+        class_name="pb-6 w-full items-start flex flex-col gap-4",
     )
 
 
+# Default event triggers.
 default_triggers = rx.Component.create().get_event_triggers()
 
 
 def same_trigger(t1, t2):
     if t1 is None or t2 is None:
         return False
+    t1 = t1 if not isinstance(t1, Sequence) else t1[0]
+    t2 = t2 if not isinstance(t2, Sequence) else t2[0]
     args1 = inspect.getfullargspec(t1).args
     args2 = inspect.getfullargspec(t2).args
     return args1 == args2
 
 
-def generate_event_triggers(comp, src):
+def generate_event_triggers(comp: type[Component], src):
     prop_name_to_description = {
         prop.name: prop.description
         for prop in src.get_props()
         if prop.name.startswith("on_")
     }
-    triggers = comp().get_event_triggers()
+    triggers = comp._unsafe_create(children=[]).get_event_triggers()
     custom_events = [
         event
         for event in triggers
@@ -1198,29 +1125,27 @@ def generate_event_triggers(comp, src):
     ]
 
     if not custom_events:
-        return rx.vstack(
-            rx.heading("Event Triggers", as_="h3", style=fonts.large),
+        return rx.box(
+            rx.heading(
+                "Event Triggers", as_="h3", class_name="font-large text-slate-12"
+            ),
             rx.link(
                 "See the full list of default event triggers",
                 href="https://reflex.dev/docs/api-reference/event-triggers/",
-                color=rx.color("violet", 11),
-                style=fonts.base,
+                class_name="text-violet-11 font-base",
                 is_external=True,
             ),
-            width="100%",
-            overflow_x="auto",
-            align_items="start",
-            padding_y=".5em",
+            class_name="py-2 overflow-x-auto justify-start flex flex-col gap-4",
         )
-    padding_left = "1em"
-
-    return rx.vstack(
-        rx.heading("Event Triggers", as_="h3", style=fonts.large),
+    table_header_class_name = (
+        "font-small text-slate-12 text-normal w-auto justify-start pl-4 font-bold"
+    )
+    return rx.box(
+        rx.heading("Event Triggers", as_="h3", class_name="font-large text-slate-12"),
         rx.link(
             "See the full list of default event triggers",
             href="https://reflex.dev/docs/api-reference/event-triggers/",
-            color=rx.color("violet", 11),
-            style=fonts.base,
+            class_name="text-violet-11 font-base",
             is_external=True,
         ),
         rx.scroll_area(
@@ -1235,47 +1160,38 @@ def generate_event_triggers(comp, src):
                 rx.table.header(
                     rx.table.row(
                         rx.table.column_header_cell(
-                            "Trigger", padding_left=padding_left, justify="start"
+                            "Trigger", class_name=table_header_class_name
                         ),
                         rx.table.column_header_cell(
-                            "Description", padding_left=padding_left, justify="start"
+                            "Description", class_name=table_header_class_name
                         ),
                     ),
-                    background_color=rx.color("slate", 3),
+                    class_name="bg-slate-3",
                 ),
                 rx.table.body(
                     *[
                         rx.table.row(
                             rx.table.cell(
-                                rx.code(event, style=get_code_style("violet")),
-                                padding_left=padding_left,
-                                justify="start",
+                                rx.code(event, class_name="code-style"),
+                                class_name="justify-start p-4",
                             ),
                             rx.table.cell(
                                 prop_name_to_description.get(event)
                                 or EVENTS[event]["description"],
-                                color=rx.color("slate", 11),
-                                style=fonts.small,
-                                padding_left=padding_left,
-                                justify="start",
+                                class_name="justify-start p-4 text-slate-11 font-small",
                             ),
                         )
                         for event in custom_events
                     ],
-                    background_color=rx.color("slate", 2),
+                    class_name="bg-slate-2",
                 ),
-                width="100%",
                 variant="surface",
                 size="1",
-                border=f"1px solid {rx.color('slate', 4)}",
+                class_name="w-full border border-slate-4",
             ),
-            width="100%",
-            overflow="hidden",
-            align_items="start",
+            class_name="w-full justify-start overflow-hidden",
         ),
-        gap="24px",
-        max_height="40em",
-        align_items="start",
+        class_name="pb-6 w-full justify-start flex flex-col gap-6 max-h-[40rem]",
     )
 
 
@@ -1283,21 +1199,18 @@ def component_docs(component_tuple, comp):
     """Generates documentation for a given component."""
 
     component = component_tuple[0]
-
     src = Source(component=component)
     props = generate_props(src, component, comp)
     triggers = generate_event_triggers(component, src)
     children = generate_valid_children(component)
 
     return rx.box(
-        rx.heading(component_tuple[1]),
-        rx.box(markdown(textwrap.dedent(src.get_docs())), padding_bottom=".5em"),
+        h2_comp(text=component_tuple[1]),
+        rx.box(markdown(textwrap.dedent(src.get_docs())), class_name="pb-2"),
         props,
         children,
         triggers,
-        text_align="left",
-        width="100%",
-        padding_bottom="2em",
+        class_name="pb-8 w-full text-left",
     )
 
 
@@ -1367,88 +1280,84 @@ def multi_docs(path, comp, component_list, title, chakra_components):
     fname = path.strip("/") + ".md"
     ll_doc_exists = os.path.exists(fname.replace(".md", "-ll.md"))
 
-    non_active_style = {
-        "padding": "8px",
-        "color": rx.color("slate", 9),
-        "width": "7em",
-        "transition": "color 0.035s ease-out",
-        "_hover": {
-            "color": rx.color("slate", 11),
-        },
-        **fonts.small,
-    }
+    active_class_name = "font-small bg-slate-2 p-2 text-slate-11 rounded-xl shadow-large w-28 cursor-default border border-slate-4 text-center"
 
-    active_style = {
-        "padding": "8px",
-        "background": rx.color("slate", 2),
-        "color": rx.color("slate", 11),
-        "box_shadow": css.shadows["large"],
-        "border_radius": "8px",
-        "width": "7em",
-        "cursor": "default",
-        "border": f"1px solid {rx.color('slate', 4)}",
-        **fonts.small,
-    }
+    non_active_class_name = "font-small w-28 transition-color hover:text-slate-11 text-slate-9 p-2 text-center"
 
     def links(current_page, ll_doc_exists, path):
+        path = str(path).rstrip("/")
         if ll_doc_exists:
             if current_page == "hl":
-                return rx.flex(
-                    rx.box(flex_grow="1"),
-                    rx.flex(
+                return rx.box(
+                    rx.box(class_name="flex-grow"),
+                    rx.box(
                         rx.link(
-                            rx.center(rx.text("High Level"), style=active_style),
+                            rx.box(rx.text("High Level"), class_name=active_class_name),
                             underline="none",
                         ),
                         rx.link(
-                            rx.center(rx.text("Low Level"), style=non_active_style),
+                            rx.box(
+                                rx.text("Low Level"), class_name=non_active_class_name
+                            ),
                             href=path + "/low",
                             underline="none",
                         ),
-                        spacing="2",
-                        padding="8px",
-                        background=rx.color("slate", 3),
-                        border_radius="16px",
-                        align_items="center",
-                        justify_items="center",
+                        class_name="bg-slate-3 rounded-[1.125rem] p-2 gap-2 flex items-center justify-center",
                     ),
-                    margin_bottom=".5em",
+                    class_name="flex mb-2",
                 )
             else:
-                return rx.flex(
-                    rx.box(flex_grow="1"),
+                return rx.box(
+                    rx.box(class_name="flex-grow"),
                     rx.flex(
                         rx.link(
-                            rx.center(rx.text("High Level"), style=non_active_style),
+                            rx.box(
+                                rx.text("High Level"), class_name=non_active_class_name
+                            ),
                             href=path,
                             underline="none",
                         ),
                         rx.link(
-                            rx.center(rx.text("Low Level"), style=active_style),
+                            rx.box(rx.text("Low Level"), class_name=active_class_name),
                             href=path + "/low",
                             underline="none",
                         ),
-                        spacing="2",
-                        padding="8px",
-                        background=rx.color("slate", 3),
-                        border_radius="16px",
-                        align_items="center",
-                        justify_items="center",
+                        class_name="bg-slate-3 rounded-[1.125rem] p-2 gap-2 flex items-center justify-center",
                     ),
-                    margin_bottom=".5em",
+                    class_name="flex mb-2",
                 )
         return rx.fragment()
 
     @docpage(set_path=path, t=title, chakra_components=chakra_components)
     def out():
         toc = get_toc(comp, fname, component_list)
-        return toc, rx.flex(
+        return toc, rx.box(
             links("hl", ll_doc_exists, path),
             xd.render(comp, filename=fname),
-            rx.heading(text="API Reference"),
-            rx.vstack(*components),
-            direction="column",
-            width="100%",
+            h1_comp(text="API Reference"),
+            rx.box(*components, class_name="flex flex-col"),
+            class_name="flex flex-col w-full",
         )
 
-    return out
+    @docpage(
+        set_path=path + "low",
+        t=title + " (Low Level)",
+        chakra_components=chakra_components,
+    )
+    def ll():
+        nonlocal fname
+        fname = fname.replace(".md", "-ll.md")
+        d2 = flexdown.parse_file(fname)
+        toc = get_toc(d2, fname, component_list)
+        return toc, rx.box(
+            links("ll", ll_doc_exists, path),
+            xd.render_file(fname),
+            h1_comp(text="API Reference"),
+            rx.box(*components, class_name="flex flex-col"),
+            class_name="flex flex-col w-full",
+        )
+
+    if ll_doc_exists:
+        return (out, ll)
+    else:
+        return out

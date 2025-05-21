@@ -79,7 +79,7 @@ class PinInput(ChakraComponent):
         range_var = Var.range(0)
         return merge_imports(
             super()._get_imports(),
-            PinInputField()._get_all_imports(),  # type: ignore
+            PinInputField._unsafe_create(children=[])._get_all_imports(),  # type: ignore
             range_var._var_data.imports if range_var._var_data is not None else {},
         )
 
@@ -164,7 +164,7 @@ class PinInputField(ChakraComponent):
 
     # the position of the PinInputField inside the PinInput.
     # Default to None because it is assigned by PinInput when created.
-    index: Optional[Var[int]] = None
+    index: Var[int | None]
 
     # The name of the form field
     name: Var[str]

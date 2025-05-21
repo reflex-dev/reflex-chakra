@@ -46,7 +46,7 @@ def form_example():
     )
 ```
 
-```md alert warning
+```markdown alert warning
 # When using the form you must include a button or input with `type_='submit'`.
 ```
 

@@ -28,9 +28,7 @@ def code_block(code: str, language: str):
             background="transparent",
             language=language,
             code_tag_props={
-                "style": {
-                    "fontFamily": "inherit",
-                }
+                "font_family": "inherit",
             },
             font_family="Source Code Pro",
             color=rx.color("slate", 12),
@@ -86,9 +84,7 @@ def code_block_dark(code: str, language: str):
             background="transparent",
             language=language,
             code_tag_props={
-                "style": {
-                    "fontFamily": "inherit",
-                }
+                "font_family": "inherit",
             },
             padding="20px",
             margin="0",

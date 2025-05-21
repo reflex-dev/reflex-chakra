@@ -18,7 +18,7 @@ rc.icon(tag="calendar")
 
 Use the tag prop to specify the icon to display.
 
-```md alert success
+```markdown alert success
 Below is a list of all available icons.
 ```
 
