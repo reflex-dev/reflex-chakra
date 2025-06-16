@@ -1,21 +1,23 @@
+import { useTheme } from "$/utils/react-theme";
 import { useColorMode as chakraUseColorMode } from "@chakra-ui/react";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import { ColorModeContext, defaultColorMode } from "$/utils/context.js";
+import { createElement, useEffect } from "react";
+import { ColorModeContext, defaultColorMode } from "$/utils/context";
 
 export default function ChakraColorModeProvider({ children }) {
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const { colorMode, toggleColorMode } = chakraUseColorMode();
-  const [resolvedColorMode, setResolvedColorMode] = useState(colorMode);
+  const { colorMode: chakraColorMode, toggleColorMode: toggleChakraColorMode } =
+    chakraUseColorMode();
 
   useEffect(() => {
-    if (colorMode != resolvedTheme) {
-      toggleColorMode();
+    if (chakraColorMode != resolvedTheme) {
+      toggleChakraColorMode();
     }
-    setResolvedColorMode(resolvedTheme);
   }, [theme, resolvedTheme]);
 
-  const rawColorMode = colorMode;
+  const toggleColorMode = () => {
+    setTheme(resolvedTheme === "light" ? "dark" : "light");
+  };
+
   const setColorMode = (mode) => {
     const allowedModes = ["light", "dark", "system"];
     if (!allowedModes.includes(mode)) {
@@ -26,11 +28,17 @@ export default function ChakraColorModeProvider({ children }) {
     }
     setTheme(mode);
   };
-  return (
-    <ColorModeContext.Provider
-      value={{ rawColorMode, resolvedColorMode, toggleColorMode, setColorMode }}
-    >
-      {children}
-    </ColorModeContext.Provider>
+
+  return createElement(
+    ColorModeContext.Provider,
+    {
+      value: {
+        rawColorMode: theme,
+        resolvedColorMode: resolvedTheme,
+        toggleColorMode,
+        setColorMode,
+      },
+    },
+    children
   );
 }

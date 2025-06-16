@@ -1,12 +1,10 @@
 """A link component."""
 
+from reflex import ImportVar
 from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
-from reflex.components.next.link import NextLink
 from reflex.utils.imports import ImportDict
 from reflex.vars import Var
-
-next_link = NextLink.create()
 
 
 class Link(ChakraComponent):
@@ -24,7 +22,7 @@ class Link(ChakraComponent):
     text: Var[str]
 
     # What the link renders to.
-    as_: Var[Component] = Var("NextLink", _var_type=Component)
+    as_: Var[Component] = Var("ReactRouterLink", _var_type=Component)
 
     # If true, the link will open in new tab.
     is_external: Var[bool]
@@ -35,10 +33,12 @@ class Link(ChakraComponent):
         Returns:
             The import dict.
         """
-        return next_link._get_imports()  # type: ignore
+        return {
+            "react-router": ImportVar("Link", alias="ReactRouterLink"),
+        }
 
     @classmethod
-    def create(cls, *children, **props) -> Component:
+    def create(cls, *children, **props):
         """Create a Link component.
 
         Args:

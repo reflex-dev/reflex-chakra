@@ -115,7 +115,7 @@ class ChakraProvider(ChakraComponent):
         """
         return {
             self.library: ImportVar(tag="extendTheme", is_default=False),
-            "$/utils/theme.js": ImportVar(tag="theme", is_default=True),
+            "$/utils/theme": ImportVar(tag="theme", is_default=True),
         }
 
     @staticmethod
@@ -132,7 +132,7 @@ chakra_provider = ChakraProvider.create()
 class ChakraColorModeProvider(Component):
     """Next-themes integration for chakra colorModeProvider."""
 
-    library = "$/public/chakra_color_mode_provider.js"
+    library = "$/public/chakra_color_mode_provider"
     tag = "ChakraColorModeProvider"
     is_default = True
 
