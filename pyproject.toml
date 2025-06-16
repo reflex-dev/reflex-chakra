@@ -1,6 +1,6 @@
 [project]
 name = "reflex-chakra"
-version = "0.7.1"
+version = "0.8.0"
 description = "reflex using chakra components"
 authors = [{ name = "Elijah Ahianyo", email = "elijahahianyo@gmail.com" }]
 maintainers = [
@@ -11,7 +11,7 @@ maintainers = [
 readme = "README.md"
 requires-python = ">=3.10"
 license.text = "Apache-2.0"
-dependencies = ["reflex >=0.7.11"]
+dependencies = ["reflex >=0.8.0a"]
 
 
 [build-system]
