@@ -23,6 +23,7 @@ jobs:
       - name: Run Type Checking
         uses: jakebailey/pyright-action@v2
         with:
+          working-directory: reflex_chakra
           version: PATH
   lint:
     runs-on: ubuntu-latest
