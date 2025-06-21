@@ -21,6 +21,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 include = ["reflex_chakra"]
 
+[dependency-groups]
+dev = ["ruff", "pyright"]
+
 [tool.ruff]
 target-version = "py310"
 lint.extend-select = ["UP", "RUF022"]
