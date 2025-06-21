@@ -26,8 +26,8 @@ class Accordion(ChakraComponent):
         icon_pos="right",
         allow_multiple: Var[bool] | bool | None = None,
         allow_toggle: Var[bool] | bool | None = None,
-        default_index: list[int] | Var[list[int] | None] | None = None,
-        index: list[int] | Var[list[int] | int] | int | None = None,
+        default_index: Var[list[int] | None] | list[int] | None = None,
+        index: Var[int | list[int]] | int | list[int] | None = None,
         reduce_motion: Var[bool] | bool | None = None,
         style: Sequence[Mapping[str, Any]]
         | Mapping[str, Any]

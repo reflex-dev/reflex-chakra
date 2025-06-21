@@ -24,10 +24,10 @@ class Flex(ChakraComponent):
         *children,
         align: Var[str] | str | None = None,
         basis: Var[str] | str | None = None,
-        direction: list[str] | Var[list[str] | str] | str | None = None,
+        direction: Var[list[str] | str] | list[str] | str | None = None,
         grow: Var[str] | str | None = None,
         justify: Var[str] | str | None = None,
-        wrap: list[str] | Var[list[str] | str] | str | None = None,
+        wrap: Var[list[str] | str] | list[str] | str | None = None,
         shrink: Var[str] | str | None = None,
         style: Sequence[Mapping[str, Any]]
         | Mapping[str, Any]

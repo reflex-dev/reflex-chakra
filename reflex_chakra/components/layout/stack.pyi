@@ -24,9 +24,9 @@ class Stack(ChakraComponent):
         cls,
         *children,
         align_items: Var[str] | str | None = None,
-        direction: list[str]
-        | Literal["column", "row"]
-        | Var[list[str] | Literal["column", "row"]]
+        direction: Literal["column", "row"]
+        | Var[Literal["column", "row"] | list[str]]
+        | list[str]
         | None = None,
         is_inline: Var[bool] | bool | None = None,
         justify_content: Var[str] | str | None = None,
@@ -73,9 +73,9 @@ class Hstack(Stack):
         cls,
         *children,
         align_items: Var[str] | str | None = None,
-        direction: list[str]
-        | Literal["column", "row"]
-        | Var[list[str] | Literal["column", "row"]]
+        direction: Literal["column", "row"]
+        | Var[Literal["column", "row"] | list[str]]
+        | list[str]
         | None = None,
         is_inline: Var[bool] | bool | None = None,
         justify_content: Var[str] | str | None = None,
@@ -122,9 +122,9 @@ class Vstack(Stack):
         cls,
         *children,
         align_items: Var[str] | str | None = None,
-        direction: list[str]
-        | Literal["column", "row"]
-        | Var[list[str] | Literal["column", "row"]]
+        direction: Literal["column", "row"]
+        | Var[Literal["column", "row"] | list[str]]
+        | list[str]
         | None = None,
         is_inline: Var[bool] | bool | None = None,
         justify_content: Var[str] | str | None = None,

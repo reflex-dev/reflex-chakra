@@ -22,8 +22,8 @@ class Highlight(ChakraComponent):
     def create(  # type: ignore
         cls,
         *children,
-        query: list[str] | Var[list[str]] | None = None,
-        styles: dict | Var[dict] | None = None,
+        query: Var[list[str]] | list[str] | None = None,
+        styles: Var[dict] | dict | None = None,
         style: Sequence[Mapping[str, Any]]
         | Mapping[str, Any]
         | Var[Mapping[str, Any]]

@@ -24,8 +24,8 @@ class RangeSlider(ChakraComponent):
     def create(  # type: ignore
         cls,
         *children,
-        value: list[int] | Var[list[int]] | None = None,
-        default_value: list[int] | Var[list[int]] | None = None,
+        value: Var[list[int]] | list[int] | None = None,
+        default_value: Var[list[int]] | list[int] | None = None,
         direction: Literal["ltr", "rtl"] | Var[Literal["ltr", "rtl"]] | None = None,
         focus_thumb_on_change: Var[bool] | bool | None = None,
         is_disabled: Var[bool] | bool | None = None,

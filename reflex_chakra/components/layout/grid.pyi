@@ -117,7 +117,7 @@ class ResponsiveGrid(ChakraComponent):
         auto_rows: Var[str] | str | None = None,
         column: Var[str] | str | None = None,
         row: Var[str] | str | None = None,
-        columns: list[int] | Var[list[int]] | None = None,
+        columns: Var[list[int]] | list[int] | None = None,
         min_child_width: Var[str] | str | None = None,
         spacing: Var[str] | str | None = None,
         spacing_x: Var[str] | str | None = None,
