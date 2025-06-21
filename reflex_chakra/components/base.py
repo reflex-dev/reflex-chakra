@@ -9,7 +9,7 @@ from typing import Literal
 from reflex.components.component import Component
 from reflex.utils.imports import ImportDict, ImportVar
 from reflex.vars.base import Var
-
+from reflex.components.component import field
 from reflex_chakra import constants
 
 
@@ -17,10 +17,13 @@ class ChakraComponent(Component):
     """A component that wraps a Chakra component."""
 
     library: str = "@chakra-ui/react@2.6.1"  # type: ignore
-    lib_dependencies: list[str] = [
-        "@chakra-ui/system@2.5.7",
-        "framer-motion@10.16.4",
-    ]
+    lib_dependencies: list[str] = field(
+        default_factory=lambda: [
+            "@chakra-ui/system@2.5.7",
+            "framer-motion@10.16.4",
+        ],
+        is_javascript_property=False,
+    )
 
     @staticmethod
     def _get_app_wrap_components() -> dict[tuple[int, str], Component]:
@@ -211,14 +214,14 @@ LiteralCardVariant = Literal["outline", "filled", "elevated", "unstyled"]
 LiteralStackDirection = Literal["row", "column"]
 LiteralImageLoading = Literal["eager", "lazy"]
 LiteralTagSize = Literal["sm", "md", "lg"]
-LiteralSpinnerSize = Literal[Literal[LiteralTagSize], "xs", "xl"]
-LiteralAvatarSize = Literal[Literal[LiteralTagSize], "xl", "xs", "2xl", "full", "2xs"]
+LiteralSpinnerSize = Literal[LiteralTagSize, "xs", "xl"]
+LiteralAvatarSize = Literal[LiteralTagSize, "xl", "xs", "2xl", "full", "2xs"]
 LiteralButtonSize = Literal["sm", "md", "lg", "xs"]
 # Applies to AlertDialog and Modal
 LiteralAlertDialogSize = Literal[
     "sm", "md", "lg", "xs", "2xl", "full", "3xl", "4xl", "5xl", "6xl"
 ]
-LiteralDrawerSize = Literal[Literal[LiteralSpinnerSize], "xl", "full"]
+LiteralDrawerSize = Literal[LiteralSpinnerSize, "xl", "full"]
 
 LiteralMenuStrategy = Literal["fixed", "absolute"]
 LiteralMenuOption = Literal["checkbox", "radio"]

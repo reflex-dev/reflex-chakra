@@ -99,13 +99,10 @@ class Thead(ChakraComponent):
         """
         allowed_types = (list, tuple)
         if (
-            (
-                isinstance(headers, Var)
-                and not types.check_type_in_allowed_types(
-                    headers._var_type, allowed_types
-                )
-            )
-            or not isinstance(headers, Var)
+            isinstance(headers, Var)
+            and not types.check_type_in_allowed_types(headers._var_type, allowed_types)
+        ) or (
+            not isinstance(headers, Var)
             and not types.check_type_in_allowed_types(type(headers), allowed_types)
         ):
             raise TypeError("table headers should be a list or tuple")
@@ -222,13 +219,10 @@ class Tfoot(ChakraComponent):
         """
         allowed_types = (list, tuple)
         if (
-            (
-                isinstance(footers, Var)
-                and not types.check_type_in_allowed_types(
-                    footers._var_type, allowed_types
-                )
-            )
-            or not isinstance(footers, Var)
+            isinstance(footers, Var)
+            and not types.check_type_in_allowed_types(footers._var_type, allowed_types)
+        ) or (
+            not isinstance(footers, Var)
             and not types.check_type_in_allowed_types(type(footers), allowed_types)
         ):
             raise TypeError("table headers should be a list or tuple")

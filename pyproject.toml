@@ -26,8 +26,9 @@ dev = ["ruff", "pyright"]
 
 [tool.ruff]
 target-version = "py310"
-lint.extend-select = ["UP", "RUF022"]
+lint.select = ["UP", "RUF", "F"]
 lint.ignore = ["F403", "F405", "UP038"]
+lint.allowed-confusables = ["’"]
 
 [tool.pyright]
 reportIncompatibleMethodOverride = false
