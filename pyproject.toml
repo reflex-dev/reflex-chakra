@@ -31,4 +31,4 @@ lint.ignore = ["F403", "F405", "UP038"]
 lint.allowed-confusables = ["’"]
 
 [tool.pyright]
-reportIncompatibleMethodOverride = false
+reportIncompatibleMethodOverride = "warning"
