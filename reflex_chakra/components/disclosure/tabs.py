@@ -1,7 +1,6 @@
 """Tab components."""
 
-from typing import List, Optional, Tuple
-
+from typing import ClassVar
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralColorScheme,
@@ -9,7 +8,7 @@ from reflex_chakra.components import (
     LiteralTagAlign,
 )
 from reflex.components.component import Component
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Tabs(ChakraComponent):
@@ -49,7 +48,7 @@ class Tabs(ChakraComponent):
 
     @classmethod
     def create(
-        cls, *children, items: Optional[List[Tuple[str, str]]] = None, **props
+        cls, *children, items: list[tuple[str, str]] | None = None, **props
     ) -> Component:
         """Create a tab component.
 
@@ -90,7 +89,7 @@ class Tab(ChakraComponent):
     # The id of the panel.
     panel_id: Var[str]
 
-    _valid_parents: List[str] = ["TabList"]
+    _valid_parents: ClassVar[list[str]] = ["TabList"]
 
 
 class TabList(ChakraComponent):
@@ -98,7 +97,7 @@ class TabList(ChakraComponent):
 
     tag = "TabList"
 
-    _valid_parents: List[str] = ["Tabs"]
+    _valid_parents: ClassVar[list[str]] = ["Tabs"]
 
 
 class TabPanels(ChakraComponent):
@@ -106,7 +105,7 @@ class TabPanels(ChakraComponent):
 
     tag = "TabPanels"
 
-    _valid_parents: List[str] = ["Tabs"]
+    _valid_parents: ClassVar[list[str]] = ["Tabs"]
 
 
 class TabPanel(ChakraComponent):
@@ -114,4 +113,4 @@ class TabPanel(ChakraComponent):
 
     tag = "TabPanel"
 
-    _valid_parents: List[str] = ["TabPanels"]
+    _valid_parents: ClassVar[list[str]] = ["TabPanels"]

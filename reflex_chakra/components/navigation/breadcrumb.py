@@ -4,7 +4,7 @@ from reflex_chakra.components import ChakraComponent
 from reflex_chakra.components.navigation.link import Link
 from reflex.components.component import Component
 from reflex.components.core.foreach import Foreach
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Breadcrumb(ChakraComponent):

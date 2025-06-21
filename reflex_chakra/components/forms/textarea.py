@@ -6,7 +6,7 @@ from reflex_chakra.components import ChakraComponent, LiteralInputVariant
 from reflex.components.component import Component
 from reflex.components.core.debounce import DebounceInput
 from reflex.event import EventHandler
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class TextArea(ChakraComponent):

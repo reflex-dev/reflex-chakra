@@ -5,7 +5,7 @@ from __future__ import annotations
 from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
 from reflex.components.core.foreach import Foreach
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class List(ChakraComponent):

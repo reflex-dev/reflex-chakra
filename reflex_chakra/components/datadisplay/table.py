@@ -1,12 +1,11 @@
 """Table components."""
 
-from typing import List, Tuple
-
+from typing import ClassVar
 from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
 from reflex.components.core.foreach import Foreach
 from reflex.utils import types
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Table(ChakraComponent):
@@ -66,7 +65,7 @@ class Thead(ChakraComponent):
     tag = "Thead"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Tfoot"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Tfoot"]
 
     @classmethod
     def create(cls, *children, headers=None, **props) -> Component:
@@ -118,7 +117,7 @@ class Tbody(ChakraComponent):
     tag = "Tbody"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Tfoot", "Td", "Th"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Tfoot", "Td", "Th"]
 
     @classmethod
     def create(cls, *children, rows=None, **props) -> Component:
@@ -157,7 +156,7 @@ class Tbody(ChakraComponent):
         Raises:
             TypeError: If rows are not lists or tuples containing inner lists or tuples.
         """
-        allowed_subclasses = (List, Tuple)
+        allowed_subclasses = (list, tuple)
         if isinstance(rows, Var):
             outer_type = rows._var_type
             inner_type = (
@@ -192,7 +191,7 @@ class Tfoot(ChakraComponent):
     tag = "Tfoot"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Td", "Th", "Tfoot"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Td", "Th", "Tfoot"]
 
     @classmethod
     def create(cls, *children, footers=None, **props) -> Component:
@@ -241,7 +240,7 @@ class Tr(ChakraComponent):
     tag = "Tr"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Tfoot", "Tr"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Tfoot", "Tr"]
 
     @classmethod
     def create(cls, *children, cell_type: str = "", cells=None, **props) -> Component:
@@ -272,7 +271,7 @@ class Th(ChakraComponent):
     tag = "Th"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Tr", "Td", "Th"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Tr", "Td", "Th"]
 
     # Aligns the cell content to the right.
     is_numeric: Var[bool]
@@ -284,7 +283,7 @@ class Td(ChakraComponent):
     tag = "Td"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead"]
 
     # Aligns the cell content to the right.
     is_numeric: Var[bool]

@@ -7,7 +7,7 @@ from typing import Literal
 from reflex_chakra.components import ChakraComponent, LiteralChakraDirection
 from reflex.components.component import Component
 from reflex.event import EventHandler
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 LiteralLayout = Literal["horizontal", "vertical"]
 

@@ -1,6 +1,6 @@
 """A radio component."""
 
-from typing import Any, List
+from typing import Any
 
 from reflex_chakra.components import ChakraComponent
 from reflex_chakra.components.typography.text import Text
@@ -8,7 +8,7 @@ from reflex.components.component import Component
 from reflex.components.core.foreach import Foreach
 from reflex.event import EventHandler
 from reflex.utils.types import _issubclass
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class RadioGroup(ChakraComponent):
@@ -44,7 +44,7 @@ class RadioGroup(ChakraComponent):
         if (
             len(children) == 1
             and isinstance(children[0], Var)
-            and _issubclass(children[0]._var_type, List)
+            and _issubclass(children[0]._var_type, list)
         ):
             children = [Foreach.create(children[0], lambda item: Radio.create(item))]
         return super().create(*children, **props)

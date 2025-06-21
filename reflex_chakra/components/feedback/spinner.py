@@ -1,7 +1,7 @@
 """Container to stack elements with spacing."""
 
 from reflex_chakra.components import ChakraComponent, LiteralSpinnerSize
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Spinner(ChakraComponent):

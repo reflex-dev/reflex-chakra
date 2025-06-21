@@ -1,7 +1,7 @@
 """Link overlay components."""
 
 from reflex_chakra.components import ChakraComponent
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class LinkOverlay(ChakraComponent):

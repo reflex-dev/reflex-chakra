@@ -8,7 +8,7 @@ from reflex_chakra.components import (
     LiteralTagSize,
 )
 from reflex.event import EventHandler
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Checkbox(ChakraComponent):

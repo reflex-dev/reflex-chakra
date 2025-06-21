@@ -1,9 +1,7 @@
 """Container to stack elements with spacing."""
 
-from typing import Union
-
 from reflex_chakra.components import ChakraComponent
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Progress(ChakraComponent):
@@ -27,7 +25,7 @@ class Progress(ChakraComponent):
     min_: Var[int]
 
     # The value of the progress indicator. If undefined the progress bar will be in indeterminate state
-    value: Var[Union[int, float]]
+    value: Var[int | float]
 
     # The color scheme of the progress bar.
     color_scheme: Var[str]

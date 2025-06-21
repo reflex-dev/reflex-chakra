@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Union
+from typing import Literal
 
 from reflex_chakra.components import ChakraComponent
 from reflex_chakra.components.media import Icon
 from reflex.components.component import Component
 from reflex.event import EventHandler
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 ModalSizes = Literal["xs", "sm", "md", "lg", "xl", "full"]
 
@@ -73,10 +73,10 @@ class Modal(ChakraComponent):
     def create(
         cls,
         *children,
-        header: Optional[Union[Component, str]] = None,
-        body: Optional[Union[Component, str]] = None,
-        footer: Optional[Union[Component, str]] = None,
-        close_button: Optional[Component] = None,
+        header: Component | str | None = None,
+        body: Component | str | None = None,
+        footer: Component | str | None = None,
+        close_button: Component | None = None,
         **props,
     ) -> Component:
         """Create a modal component.

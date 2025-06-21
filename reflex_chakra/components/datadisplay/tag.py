@@ -1,7 +1,5 @@
 """Chakra Tag Component."""
 
-from typing import Optional
-
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralTagColorScheme,
@@ -9,7 +7,7 @@ from reflex_chakra.components import (
     LiteralVariant,
 )
 from reflex.components.component import Component
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class TagLabel(ChakraComponent):
@@ -62,9 +60,9 @@ class Tag(ChakraComponent):
         cls,
         label: Component,
         *,
-        left_icon: Optional[Component] = None,
-        right_icon: Optional[Component] = None,
-        close_button: Optional[Component] = None,
+        left_icon: Component | None = None,
+        right_icon: Component | None = None,
+        close_button: Component | None = None,
         **props,
     ) -> Component:
         """Creates a Chakra Tag with a label and optionally left_icon, right_icon, and close_button, and returns it.

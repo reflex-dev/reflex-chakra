@@ -1,7 +1,6 @@
 """A button component."""
 
-from typing import List
-
+from typing import ClassVar
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralButtonSize,
@@ -9,7 +8,7 @@ from reflex_chakra.components import (
     LiteralColorScheme,
     LiteralSpinnerPlacement,
 )
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Button(ChakraComponent):
@@ -56,7 +55,7 @@ class Button(ChakraComponent):
     type_: Var[str]
 
     # Components that are not allowed as children.
-    _invalid_children: List[str] = ["Button", "MenuButton"]
+    _invalid_children: ClassVar[list[str]] = ["Button", "MenuButton"]
 
     # The name of the form field
     name: Var[str]

@@ -9,7 +9,7 @@ from reflex_chakra.components import (
 )
 from reflex.components.component import Component
 from reflex.event import EventHandler
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class NumberInput(ChakraComponent):

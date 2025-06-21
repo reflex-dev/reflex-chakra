@@ -1,7 +1,7 @@
 """A time input component."""
 
 from reflex_chakra.components.forms.input import Input
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class TimePicker(Input):

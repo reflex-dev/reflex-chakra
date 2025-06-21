@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 import reflex as rx
 from reflex_chakra.components import ChakraComponent, LiteralInputVariant
@@ -10,8 +9,8 @@ from reflex.components.component import Component
 from reflex.components.tags.tag import Tag
 from reflex.event import EventHandler
 from reflex.utils import format
-from reflex.utils.imports import ImportDict, merge_imports
-from reflex.vars import Var
+from reflex.utils.imports import ParsedImportDict, merge_imports
+from reflex.vars.base import Var
 
 
 class PinInput(ChakraComponent):
@@ -70,7 +69,7 @@ class PinInput(ChakraComponent):
     # Fired when the pin input is completed.
     on_complete: EventHandler[lambda e0: [e0]]
 
-    def _get_imports(self) -> ImportDict:
+    def _get_imports(self) -> ParsedImportDict:
         """Include PinInputField explicitly because it may not be a child component at compile time.
 
         Returns:
@@ -102,7 +101,7 @@ class PinInput(ChakraComponent):
             return format.format_array_ref(self.id, idx=self.length)
         return super().get_ref()
 
-    def _get_ref_hook(self) -> Optional[str]:
+    def _get_ref_hook(self):
         """Override the base _get_ref_hook to handle array refs.
 
         Returns:
@@ -110,14 +109,13 @@ class PinInput(ChakraComponent):
         """
         if self.id:
             ref = format.format_array_ref(self.id, None)
-            refs_declaration = Var.create(
-                f"{str(Var.range(self.length))}.map(() => useRef(null))",
-                _var_is_string=False,
+            refs_declaration = Var.range(self.length.to(int)).foreach(
+                lambda _: Var("useRef(null)")
             )
             if ref:
-                return (
+                return Var(
                     f"const {ref} = {str(refs_declaration)}; "
-                    f"{str(Var.create(ref, _var_is_string=False).as_ref())} = {ref}"
+                    f"{Var(ref)._as_ref()!s} = {ref}"
                 )
             return super()._get_ref_hook()
 
@@ -192,7 +190,7 @@ class PinInputField(ChakraComponent):
             _create,
         )
 
-    def _get_ref_hook(self) -> Optional[str]:
+    def _get_ref_hook(self) -> None:
         return None
 
     def get_ref(self):

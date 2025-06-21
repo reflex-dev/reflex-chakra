@@ -1,8 +1,8 @@
 """A box component that can contain other components."""
 
 from reflex_chakra.components import ChakraComponent
-from reflex.components.tags import Tag
-from reflex.vars import Var
+from reflex.components.tags.tag import Tag
+from reflex.vars.base import Var
 
 
 class Box(ChakraComponent):

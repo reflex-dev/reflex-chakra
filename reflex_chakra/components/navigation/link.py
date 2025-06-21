@@ -4,7 +4,7 @@ from reflex import ImportVar
 from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
 from reflex.utils.imports import ImportDict
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Link(ChakraComponent):

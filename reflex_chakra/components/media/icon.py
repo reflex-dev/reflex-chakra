@@ -1,7 +1,5 @@
 """An icon component."""
 
-from typing import List
-
 from reflex_chakra.components.base import ChakraComponent
 from reflex.utils import format
 
@@ -49,7 +47,7 @@ class Icon(ChakraIconComponent):
 
 
 # List of all icons.
-ICON_LIST: List[str] = [
+ICON_LIST: list[str] = [
     "add",
     "arrow_back",
     "arrow_down",

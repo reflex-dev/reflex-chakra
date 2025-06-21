@@ -1,6 +1,6 @@
 import flexdown
 import reflex as rx
-import reflex_chakra as rc
+import reflex_chakra as rc  # noqa: F401
 import black
 import textwrap
 from typing import Any

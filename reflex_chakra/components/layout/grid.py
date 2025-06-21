@@ -1,9 +1,7 @@
 """Container to stack elements with spacing."""
 
-from typing import List
-
 from reflex_chakra.components import ChakraComponent
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Grid(ChakraComponent):
@@ -98,7 +96,7 @@ class ResponsiveGrid(ChakraComponent):
     row: Var[str]
 
     # A list that defines the number of columns for each breakpoint.
-    columns: Var[List[int]]
+    columns: Var[list[int]]
 
     # The width at which child elements will break into columns. Pass a number for pixel values or a string for any other valid CSS length.
     min_child_width: Var[str]

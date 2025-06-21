@@ -9,13 +9,12 @@ import re
 from types import UnionType
 from typing import (
     Any,
-    Sequence,
-    Type,
     Literal,
     Union,
     get_args,
     get_origin,
 )
+from collections.abc import Sequence
 import mistletoe
 from ..utils.flexdown import xd, markdown, docdemobox
 from ..utils.sidebar import sidebar as sb
@@ -676,7 +675,7 @@ class Source(Base):
     """Parse the source code of a component."""
 
     # The component to parse.
-    component: Type[Component]
+    component: type[Component]
 
     # The source code.
     code: list[str] = []

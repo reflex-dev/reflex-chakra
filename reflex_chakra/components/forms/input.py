@@ -11,7 +11,7 @@ from reflex.components.literals import LiteralInputType
 from reflex.constants import MemoizationMode
 from reflex.event import EventHandler
 from reflex.utils.imports import ImportDict
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Input(ChakraComponent):

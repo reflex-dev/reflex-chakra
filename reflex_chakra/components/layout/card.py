@@ -1,7 +1,5 @@
 """Chakra Card component."""
 
-from typing import Optional
-
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralCardVariant,
@@ -9,7 +7,7 @@ from reflex_chakra.components import (
     LiteralTagSize,
 )
 from reflex.components.component import Component
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class CardHeader(ChakraComponent):
@@ -66,8 +64,8 @@ class Card(ChakraComponent):
         cls,
         body: Component,
         *,
-        header: Optional[Component] = None,
-        footer: Optional[Component] = None,
+        header: Component | None = None,
+        footer: Component | None = None,
         **props,
     ) -> Component:
         """Creates a Chakra Card with a body and optionally header and/or footer, and returns it.

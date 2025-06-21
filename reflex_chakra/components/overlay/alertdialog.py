@@ -6,7 +6,7 @@ from reflex_chakra.components import ChakraComponent, LiteralAlertDialogSize
 from reflex_chakra.components.media.icon import Icon
 from reflex.components.component import Component
 from reflex.event import EventHandler
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class AlertDialog(ChakraComponent):

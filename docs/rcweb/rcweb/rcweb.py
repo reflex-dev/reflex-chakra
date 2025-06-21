@@ -6,7 +6,7 @@ from collections import defaultdict
 from types import SimpleNamespace
 
 import reflex as rx
-import reflex_chakra as rc
+import reflex_chakra as rc  # noqa: F401
 import flexdown
 
 from .utils.flexdown import xd

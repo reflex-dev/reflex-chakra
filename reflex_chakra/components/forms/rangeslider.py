@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
 
 from reflex_chakra.components import ChakraComponent, LiteralChakraDirection
 from reflex.components.component import Component
 from reflex.event import EventHandler
 from reflex.utils import format
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class RangeSlider(ChakraComponent):
@@ -17,10 +16,10 @@ class RangeSlider(ChakraComponent):
     tag = "RangeSlider"
 
     # State var to bind the input.
-    value: Var[List[int]]
+    value: Var[list[int]]
 
     # The default values.
-    default_value: Var[List[int]]
+    default_value: Var[list[int]]
 
     # The writing mode ("ltr" | "rtl")
     direction: Var[LiteralChakraDirection]
@@ -66,7 +65,7 @@ class RangeSlider(ChakraComponent):
         """
         return None
 
-    def _get_ref_hook(self) -> Optional[str]:
+    def _get_ref_hook(self):
         """Override the base _get_ref_hook to handle array refs.
 
         Returns:
@@ -75,9 +74,9 @@ class RangeSlider(ChakraComponent):
         if self.id:
             ref = format.format_array_ref(self.id, None)
             if ref:
-                return (
+                return Var(
                     f"const {ref} = Array.from({{length:2}}, () => useRef(null)); "
-                    f"{str(Var.create(ref, _var_is_string=False).as_ref())} = {ref}"
+                    f"{Var(_js_expr=ref)._as_ref()!s} = {ref}",
                 )
             return super()._get_ref_hook()
 
@@ -135,7 +134,7 @@ class RangeSliderThumb(ChakraComponent):
     # The position of the thumb.
     index: Var[int]
 
-    def _get_ref_hook(self) -> Optional[str]:
+    def _get_ref_hook(self) -> None:
         # hook is None because RangeSlider is handling it.
         return None
 

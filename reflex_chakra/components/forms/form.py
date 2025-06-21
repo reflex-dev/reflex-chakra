@@ -5,7 +5,7 @@ from __future__ import annotations
 from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
 from reflex.components.el.elements.forms import Form as HTMLForm
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Form(ChakraComponent, HTMLForm):

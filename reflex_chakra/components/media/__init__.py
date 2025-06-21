@@ -4,4 +4,10 @@ from .avatar import Avatar, AvatarBadge, AvatarGroup
 from .icon import Icon
 from .image import Image
 
-__all__ = [f for f in dir() if f[0].isupper()]  # type: ignore
+__all__ = [
+    "Avatar",
+    "AvatarBadge",
+    "AvatarGroup",
+    "Icon",
+    "Image",
+]

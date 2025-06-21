@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import shutil
-from functools import lru_cache
 from pathlib import Path
-from typing import List, Literal
+from typing import Literal
 
 from reflex.components.component import Component
 from reflex.utils.imports import ImportDict, ImportVar
@@ -18,13 +17,12 @@ class ChakraComponent(Component):
     """A component that wraps a Chakra component."""
 
     library: str = "@chakra-ui/react@2.6.1"  # type: ignore
-    lib_dependencies: List[str] = [
+    lib_dependencies: list[str] = [
         "@chakra-ui/system@2.5.7",
         "framer-motion@10.16.4",
     ]
 
     @staticmethod
-    @lru_cache(maxsize=None)
     def _get_app_wrap_components() -> dict[tuple[int, str], Component]:
         return {
             (60, "ChakraProvider"): chakra_provider,
@@ -37,22 +35,6 @@ class ChakraComponent(Component):
             The dictionary of the component style as value and the style notation as key.
         """
         return {"sx": self.style}
-
-    @classmethod
-    @lru_cache(maxsize=None)
-    def _get_dependencies_imports(cls) -> ImportDict:
-        """Get the imports from lib_dependencies for installing.
-
-        Returns:
-            The dependencies imports of the component.
-        """
-        return {
-            dep: [ImportVar(tag=None, render=False)]
-            for dep in [
-                "@chakra-ui/system@2.5.7",
-                "framer-motion@10.16.4",
-            ]
-        }
 
     @classmethod
     def create(cls, *children, **props) -> Component:
@@ -119,7 +101,6 @@ class ChakraProvider(ChakraComponent):
         }
 
     @staticmethod
-    @lru_cache(maxsize=None)
     def _get_app_wrap_components() -> dict[tuple[int, str], Component]:
         return {
             (50, "ChakraColorModeProvider"): chakra_color_mode_provider,

@@ -5,7 +5,7 @@ from reflex.components.component import Component
 from reflex.components.core.foreach import Foreach
 from reflex.event import EventHandler
 from reflex.utils.types import _issubclass
-from reflex.vars import Var
+from reflex.vars.base import Var
 from reflex.components.el import Option as Option
 
 

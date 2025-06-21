@@ -1,6 +1,6 @@
 [project]
 name = "reflex-chakra"
-version = "0.8.0"
+version = "0.8.1"
 description = "reflex using chakra components"
 authors = [{ name = "Elijah Ahianyo", email = "elijahahianyo@gmail.com" }]
 maintainers = [
@@ -11,7 +11,7 @@ maintainers = [
 readme = "README.md"
 requires-python = ">=3.10"
 license.text = "Apache-2.0"
-dependencies = ["reflex >=0.8.0a"]
+dependencies = ["reflex >=0.8.0dev"]
 
 
 [build-system]
@@ -23,5 +23,8 @@ include = ["reflex_chakra"]
 
 [tool.ruff]
 target-version = "py310"
+lint.extend-select = ["UP", "RUF022"]
+lint.ignore = ["F403", "F405", "UP038"]
 
 [tool.pyright]
+reportIncompatibleMethodOverride = false

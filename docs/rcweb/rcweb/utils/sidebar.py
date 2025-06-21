@@ -53,23 +53,29 @@ def get_component_link(category: str | None, clist, prefix="") -> str:
     component_name = rx.utils.format.to_kebab_case(clist[0])
     # construct the component link. The component name points to the name of the md file.
     return "/".join(
-        [prefix, category.lower().replace(' ', '-') if category else '', component_name.lower()]).replace("//", "/")
+        [
+            prefix,
+            category.lower().replace(" ", "-") if category else "",
+            component_name.lower(),
+        ]
+    ).replace("//", "/")
 
 
-def get_category_children(category, category_list, prefix="") -> SidebarItem | list[SidebarItem]:
+def get_category_children(
+    category, category_list, prefix=""
+) -> SidebarItem | list[SidebarItem]:
     category = category.replace("-", " ")
     if isinstance(category_list, dict):
         category_children = []
         for c in category_list:
             category_child = get_category_children(c, category_list[c])
-            category_children.extend(category_child) if isinstance(category_child, list) else category_children.append(
-                category_child)
+            category_children.extend(category_child) if isinstance(
+                category_child, list
+            ) else category_children.append(category_child)
 
         return SidebarItem(
             names=category,
-            children=[
-                category_children
-            ],
+            children=[category_children],
         )
     category_item_children = []
     for c in category_list:
@@ -77,11 +83,16 @@ def get_category_children(category, category_list, prefix="") -> SidebarItem | l
         name = rx.utils.format.to_title_case(component_name)
         item = SidebarItem(
             names=name,
-            link=get_component_link(category, c) if not category == "Markdowns" else get_component_link(None, c),
+            link=get_component_link(category, c)
+            if not category == "Markdowns"
+            else get_component_link(None, c),
         )
         category_item_children.append(item)
-    return SidebarItem(names=category,
-                       children=category_item_children) if not category == "Markdowns" else category_item_children
+    return (
+        SidebarItem(names=category, children=category_item_children)
+        if not category == "Markdowns"
+        else category_item_children
+    )
 
 
 def get_sidebar_items_other_libraries(chakra_components):
@@ -91,8 +102,9 @@ def get_sidebar_items_other_libraries(chakra_components):
             category,
             chakra_components[category],
         )
-        chakra_children.extend(category_item) if isinstance(category_item, list) else chakra_children.append(
-            category_item)
+        chakra_children.extend(category_item) if isinstance(
+            category_item, list
+        ) else chakra_children.append(category_item)
     return chakra_children
 
 
@@ -143,8 +155,8 @@ def format_sidebar_route(route: str) -> str:
 
 
 def sidebar_leaf(
-        item: SidebarItem,
-        url: str,
+    item: SidebarItem,
+    url: str,
 ) -> rx.Component:
     """Get the leaf node of the sidebar."""
     item.link = item.link.replace("_", "-")
@@ -240,14 +252,14 @@ def sidebar_icon(name):
 
 
 def sidebar_item_comp(
-        item: SidebarItem,
-        index: list[int],
-        url: str,
+    item: SidebarItem,
+    index: list[int],
+    url: str,
 ):
     return rx.cond(
         len(item.children) == 0,
         sidebar_leaf(item=item, url=url)
-        if not item.names in ("Introduction",)
+        if item.names not in ("Introduction",)
         else rc.accordion_item(
             rc.accordion_button(
                 sidebar_icon(item.names),
@@ -265,9 +277,8 @@ def sidebar_item_comp(
                             "text_decoration": "none",
                         },
                     ),
-                    href=format_sidebar_route(item.link)
+                    href=format_sidebar_route(item.link),
                 ),
-
                 rx.box(
                     flex_grow=1,
                 ),
@@ -346,7 +357,6 @@ def sidebar_item_comp(
 
 
 def create_sidebar_section(items, index, url):
-    nested = False
     return rx.list_item(
         rc.accordion(
             *[
@@ -375,9 +385,9 @@ def create_sidebar_section(items, index, url):
 
 @rx.memo
 def sidebar_comp(
-        url: str,
-        other_libs_index: list[int],
-        width: str = "100%",
+    url: str,
+    other_libs_index: list[int],
+    width: str = "100%",
 ):
     ul_style = {
         "display": "flex",
@@ -458,10 +468,9 @@ def sidebar_on_mobile_and_tablet(component):
             ),
             size="full",
             is_open=MobileAndTabletSidebarState.drawer_is_open,
-            width="100vw"
+            width="100vw",
         ),
         on_unmount=MobileAndTabletSidebarState.set_drawer_is_open(False),
-
     )
 
 
@@ -480,7 +489,9 @@ def sidebar(chakra_components, url=None, width: str = "100%") -> rx.Component:
     """Render the sidebar."""
 
     return rx.flex(
-        sidebar_on_mobile_and_tablet(get_sidebar_content(chakra_components, url, "100%")),
+        sidebar_on_mobile_and_tablet(
+            get_sidebar_content(chakra_components, url, "100%")
+        ),
         get_sidebar_content(chakra_components, url, width),
         width="100%",
         height="100%",

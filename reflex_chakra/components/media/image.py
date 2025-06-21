@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from reflex_chakra.components.base import ChakraComponent, LiteralImageLoading
 from reflex.components.component import Component
 from reflex.event import EventHandler
-from reflex.vars import Var
+from reflex.vars.base import Var
 
 
 class Image(ChakraComponent):
@@ -19,7 +19,7 @@ class Image(ChakraComponent):
     align: Var[str]
 
     # Fallback Reflex component to show if image is loading or image fails.
-    fallback: Optional[Component] = None
+    fallback: Var[Component]
 
     # Fallback image src to show if image is loading or image fails.
     fallback_src: Var[str]
@@ -56,16 +56,3 @@ class Image(ChakraComponent):
 
     # Fired when the image is loaded.
     on_load: EventHandler[lambda: []]
-
-    @classmethod
-    def create(cls, *children, **props) -> Component:
-        """Create an Image component.
-
-        Args:
-            *children: The children of the image.
-            **props: The props of the image.
-
-        Returns:
-            The Image component.
-        """
-        return super().create(*children, **props)
