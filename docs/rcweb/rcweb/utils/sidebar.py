@@ -33,12 +33,16 @@ class SidebarItem:
 def get_component_link(category: str | None, category_title: str):
     component_name = to_kebab_case(category_title)
     # construct the component link. The component name points to the name of the md file.
-    return "/".join(
-        [
-            category.lower().replace(" ", "-") if category else "",
-            component_name.lower(),
-        ]
-    ).replace("//", "/")
+    return "/" + (
+        "/".join(
+            [
+                category.lower().replace(" ", "-") if category else "",
+                component_name.lower(),
+            ]
+        )
+        .replace("//", "/")
+        .removeprefix("/")
+    )
 
 
 def get_category_children(

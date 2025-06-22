@@ -13,7 +13,7 @@ icon_margins = {
 
 
 def h_comp_common(
-    text: rx.Var[str],
+    text: rx.Var[str] | rx.Var[list[str]],
     heading: str,
     font_size: list[str] | str = "",
     font_weight: str = "",
@@ -25,9 +25,9 @@ def h_comp_common(
 ) -> rx.Component:
     style = style or {}
     if convert_to_str:
-        id_ = text.to(list[str])[0].lower().split().join("-")
+        id_ = text.to(list)[0].to(str).lower().split(" ").join("-")
     else:
-        id_ = text.lower().split().join("-")
+        id_ = text.to(str).lower().split(" ").join("-")
     href = rx.State.router.page.full_path + "#" + id_
 
     return rx.box(
