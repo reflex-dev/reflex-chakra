@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-
-from reflex_chakra.components import ChakraComponent, LiteralChakraDirection
 from reflex.components.component import Component
 from reflex.event import EventHandler
 from reflex.utils import format
 from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent, LiteralChakraDirection
 
 
 class RangeSlider(ChakraComponent):
@@ -63,7 +63,7 @@ class RangeSlider(ChakraComponent):
         Returns:
             The ref of the component.
         """
-        return None
+        return
 
     def _get_ref_hook(self):
         """Override the base _get_ref_hook to handle array refs.
@@ -79,6 +79,7 @@ class RangeSlider(ChakraComponent):
                     f"{Var(_js_expr=ref)._as_ref()!s} = {ref}",
                 )
             return super()._get_ref_hook()
+        return None
 
     @classmethod
     def create(cls, *children, **props) -> Component:
@@ -94,7 +95,7 @@ class RangeSlider(ChakraComponent):
             The RangeSlider component.
         """
         if len(children) == 0:
-            _id = props.get("id", None)
+            _id = props.get("id")
             if _id:
                 children = [
                     RangeSliderTrack.create(
@@ -146,3 +147,4 @@ class RangeSliderThumb(ChakraComponent):
         """
         if self.id:
             return format.format_array_ref(self.id, self.index)
+        return None

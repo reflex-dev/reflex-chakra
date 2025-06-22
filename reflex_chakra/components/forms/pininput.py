@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-
 import reflex as rx
-from reflex_chakra.components import ChakraComponent, LiteralInputVariant
 from reflex.components.component import Component
 from reflex.components.tags.tag import Tag
 from reflex.event import EventHandler
 from reflex.utils import format
 from reflex.utils.imports import ParsedImportDict, merge_imports
 from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent, LiteralInputVariant
 
 
 class PinInput(ChakraComponent):
@@ -78,7 +78,7 @@ class PinInput(ChakraComponent):
         range_var = Var.range(0)
         return merge_imports(
             super()._get_imports(),
-            PinInputField._unsafe_create(children=[])._get_all_imports(),  # type: ignore
+            PinInputField._unsafe_create(children=[])._get_all_imports(),
             range_var._var_data.imports if range_var._var_data is not None else {},
         )
 
@@ -118,6 +118,7 @@ class PinInput(ChakraComponent):
                     f"{Var(ref)._as_ref()!s} = {ref}"
                 )
             return super()._get_ref_hook()
+        return None
 
     def _render(self) -> Tag:
         """Override the base _render to remove the fake get_ref.
@@ -168,7 +169,7 @@ class PinInputField(ChakraComponent):
     name: Var[str]
 
     @classmethod
-    def for_length(cls, length: Var | int, **props) -> Var:
+    def for_length(cls, length: Var[int] | int, **props):
         """Create a PinInputField for a PinInput with a given length.
 
         Args:
@@ -185,8 +186,8 @@ class PinInputField(ChakraComponent):
                 props["name"] = f"{name}-{i}"
             return PinInputField.create(**props, index=i, key=i)
 
-        return rx.foreach(  # type: ignore
-            Var.range(length),  # type: ignore
+        return rx.foreach(
+            Var.range(Var.create(length).to(int)),
             _create,
         )
 
@@ -201,3 +202,4 @@ class PinInputField(ChakraComponent):
         """
         if self.id:
             return format.format_array_ref(self.id, self.index)
+        return None

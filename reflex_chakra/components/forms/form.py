@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
 from reflex.components.el.elements.forms import Form as HTMLForm
 from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent
 
 
 class Form(ChakraComponent, HTMLForm):
@@ -14,7 +15,7 @@ class Form(ChakraComponent, HTMLForm):
     tag = "Box"
 
     # What the form renders to.
-    as_: Var[str] = "form"  # type: ignore
+    as_: Var[str] = Var.create("form")
 
 
 class FormControl(ChakraComponent):
@@ -70,7 +71,8 @@ class FormControl(ChakraComponent):
                 children.append(FormLabel.create(*label))
 
             if not input:
-                raise AttributeError("input keyword argument is required")
+                msg = "input keyword argument is required"
+                raise AttributeError(msg)
             children.append(input)
 
             if help_text:

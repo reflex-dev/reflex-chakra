@@ -2,8 +2,9 @@
 
 from typing import Literal
 
-from reflex_chakra.components import ChakraComponent, LiteralDividerVariant
 from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent, LiteralDividerVariant
 
 LiteralLayout = Literal["horizontal", "vertical"]
 

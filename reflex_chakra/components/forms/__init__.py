@@ -1,5 +1,7 @@
 """Convenience functions to define core components."""
 
+from reflex.components.el.elements.forms import Option
+
 from .button import Button, ButtonGroup
 from .checkbox import Checkbox, CheckboxGroup
 from .colormodeswitch import (
@@ -37,7 +39,7 @@ from .rangeslider import (
     RangeSliderThumb,
     RangeSliderTrack,
 )
-from .select import Option, Select
+from .select import Select
 from .slider import Slider, SliderFilledTrack, SliderMark, SliderThumb, SliderTrack
 from .switch import Switch
 from .textarea import TextArea

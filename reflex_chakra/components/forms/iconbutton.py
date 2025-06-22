@@ -1,8 +1,9 @@
 """An icon button component."""
 
-from reflex_chakra.components.typography.text import Text
 from reflex.components.component import Component
 from reflex.vars.base import Var
+
+from reflex_chakra.components.typography.text import Text
 
 
 class IconButton(Text):

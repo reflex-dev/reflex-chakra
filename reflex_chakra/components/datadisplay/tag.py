@@ -1,13 +1,14 @@
 """Chakra Tag Component."""
 
+from reflex.components.component import Component
+from reflex.vars.base import Var
+
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralTagColorScheme,
     LiteralTagSize,
     LiteralVariant,
 )
-from reflex.components.component import Component
-from reflex.vars.base import Var
 
 
 class TagLabel(ChakraComponent):

@@ -1,10 +1,5 @@
 """An input component."""
 
-from reflex_chakra.components import (
-    ChakraComponent,
-    LiteralButtonSize,
-    LiteralInputVariant,
-)
 from reflex.components.component import Component
 from reflex.components.core.debounce import DebounceInput
 from reflex.components.literals import LiteralInputType
@@ -12,6 +7,12 @@ from reflex.constants import MemoizationMode
 from reflex.event import EventHandler
 from reflex.utils.imports import ImportDict
 from reflex.vars.base import Var
+
+from reflex_chakra.components import (
+    ChakraComponent,
+    LiteralButtonSize,
+    LiteralInputVariant,
+)
 
 
 class Input(ChakraComponent):

@@ -1,11 +1,12 @@
 from __future__ import annotations
+
 import dataclasses
 
 import reflex as rx
-import reflex_chakra as rc
-from ..constants import fonts
+from reflex.utils.format import to_kebab_case, to_snake_case, to_title_case
 
-from reflex.utils.format import to_snake_case, to_title_case, to_kebab_case
+import reflex_chakra as rc
+from rcweb.constants import fonts
 
 chakra_lib_items = []
 
@@ -51,13 +52,13 @@ def get_category_children(
         item = SidebarItem(
             names=name,
             link=get_component_link(category, component_title)
-            if not category == "Markdowns"
+            if category != "Markdowns"
             else get_component_link(None, component_title),
         )
         category_item_children.append(item)
     return (
         SidebarItem(names=category, children=category_item_children)
-        if not category == "Markdowns"
+        if category != "Markdowns"
         else category_item_children
     )
 
@@ -66,11 +67,8 @@ def get_sidebar_items_other_libraries(
     chakra_components: dict[str, list[tuple[str, list[tuple[type, str]]]]],
 ) -> list[SidebarItem]:
     chakra_children: list[SidebarItem] = []
-    for category in chakra_components:
-        category_item = get_category_children(
-            category,
-            chakra_components[category],
-        )
+    for category, category_list in chakra_components.items():
+        category_item = get_category_children(category, category_list)
         if isinstance(category_item, list):
             chakra_children.extend(category_item)
         else:
@@ -411,8 +409,16 @@ def sidebar(
     url: str | None = None,
     width: str = "100%",
 ) -> rx.Component:
-    """Render the sidebar."""
+    """Render the sidebar.
 
+    Args:
+        chakra_components: The components to display in the sidebar.
+        url: The current URL to highlight the active link.
+        width: The width of the sidebar.
+
+    Returns:
+        A sidebar component with the given components and URL.
+    """
     return rx.flex(
         sidebar_on_mobile_and_tablet(
             get_sidebar_content(chakra_components, url, "100%")

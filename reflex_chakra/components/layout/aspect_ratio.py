@@ -1,7 +1,8 @@
 """A AspectRatio component."""
 
-from reflex_chakra.components import ChakraComponent
 from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent
 
 
 class AspectRatio(ChakraComponent):

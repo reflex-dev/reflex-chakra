@@ -1,7 +1,8 @@
 """An icon component."""
 
-from reflex_chakra.components.base import ChakraComponent
 from reflex.utils import format
+
+from reflex_chakra.components.base import ChakraComponent
 
 
 class ChakraIconComponent(ChakraComponent):
@@ -33,15 +34,14 @@ class Icon(ChakraIconComponent):
             The created component.
         """
         if children:
-            raise AttributeError(
-                f"Passing children to Icon component is not allowed: remove positional arguments {children} to fix"
-            )
+            msg = f"Passing children to Icon component is not allowed: remove positional arguments {children} to fix"
+            raise AttributeError(msg)
         if "tag" not in props:
-            raise AttributeError("Missing 'tag' keyword-argument for Icon")
+            msg = "Missing 'tag' keyword-argument for Icon"
+            raise AttributeError(msg)
         if not isinstance(props["tag"], str) or props["tag"].lower() not in ICON_LIST:
-            raise ValueError(
-                f"Invalid icon tag: {props['tag']}. Please use one of the following: {sorted(ICON_LIST)}"
-            )
+            msg = f"Invalid icon tag: {props['tag']}. Please use one of the following: {sorted(ICON_LIST)}"
+            raise ValueError(msg)
         props["tag"] = format.to_title_case(props["tag"]) + "Icon"
         return super().create(*children, **props)
 

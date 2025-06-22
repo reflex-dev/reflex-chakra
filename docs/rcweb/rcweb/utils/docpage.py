@@ -1,11 +1,12 @@
 """Utility functions for the component docs page."""
 
-from collections.abc import Callable
 import dataclasses
 import functools
+import hashlib
 import inspect
-import reflex_chakra as rc
 import re
+import textwrap
+from collections.abc import Callable, Sequence
 from types import UnionType
 from typing import (
     Any,
@@ -14,23 +15,23 @@ from typing import (
     get_args,
     get_origin,
 )
-from reflex.constants.colors import ColorType
-from collections.abc import Sequence
-import mistletoe
-from ..utils.flexdown import xd, markdown, docdemobox
-from ..utils.sidebar import sidebar as sb
-from ..utils.sidebar import MobileAndTabletSidebarState
-from ..utils.blocks.headings import h2_comp, h1_comp
-import reflex as rx
+
 import flexdown
 import flexdown.blocks
-import textwrap
+import mistletoe
 import mistletoe.block_token
 import mistletoe.token
-from reflex.components.component import Component
+import reflex as rx
 from reflex.components.base.fragment import Fragment
+from reflex.components.component import Component
 from reflex.components.el.elements.base import BaseHTML
-import hashlib
+from reflex.constants.colors import ColorType
+
+import reflex_chakra as rc
+from rcweb.utils.blocks.headings import h1_comp, h2_comp
+from rcweb.utils.flexdown import docdemobox, markdown, xd
+from rcweb.utils.sidebar import MobileAndTabletSidebarState
+from rcweb.utils.sidebar import sidebar as sb
 
 flat_items = []
 
@@ -309,8 +310,7 @@ def get_default_value(lines: list[str], start_index: int) -> str:
         if comment_line.startswith("#"):
             default_match = re.search(r"Default:\s*(.+)$", comment_line)
             if default_match:
-                default_value = default_match.group(1).strip()
-                return default_value
+                return default_match.group(1).strip()
 
     # Get the initial line
     line = lines[start_index]
@@ -339,8 +339,7 @@ def get_default_value(lines: list[str], start_index: int) -> str:
     def process_var_create_safe(match):
         content = match.group(1)
         # Extract only the first argument
-        first_arg = re.split(r",", content)[0].strip()
-        return first_arg
+        return re.split(r",", content)[0].strip()
 
     value = re.sub(r"Var\.create_safe\((.*?)\)", process_var_create_safe, value)
     value = re.sub(r"\bColor\s*\(", "rx.color(", value)
@@ -408,7 +407,8 @@ def get_path(component_fn: Callable):
     module = inspect.getmodule(component_fn)
 
     if module is None:
-        raise ValueError(f"Could not find module for {component_fn}")
+        msg = f"Could not find module for {component_fn}"
+        raise ValueError(msg)
 
     # Create a path based on the module name.
     return (
@@ -418,12 +418,12 @@ def get_path(component_fn: Callable):
 
 
 def docpage(
+    chakra_components: dict[str, list[tuple[str, list[tuple[type, str]]]]],
     set_path: str | None = None,
     t: str | None = None,
     right_sidebar: bool = True,
     page_title: str | None = None,
     pseudo_right_bar: bool = False,
-    chakra_components: dict[str, list[tuple[str, list[tuple[type, str]]]]] = {},
 ):
     """A template that most pages on the reflex.dev site should use.
 
@@ -763,9 +763,9 @@ class Source:
 
             if i > 0:
                 comment_above = self.code[i - 1].strip()
-                assert comment_above.startswith("#"), (
-                    f"Expected comment, got {comment_above}"
-                )
+                if not comment_above.startswith("#"):
+                    msg = f"Expected comment above prop {prop}, got {comment_above}"
+                    raise ValueError(msg)
 
             comment = Source.get_comment(comments)
             comments.clear()
@@ -860,11 +860,11 @@ def prop_docs(prop: Prop) -> list[rx.Component]:
 
     literal_values = []  # Literal values of the prop
     all_types = []  # List for all the prop types
-    MAX_PROP_VALUES = 2
+    max_prop_values = 2
 
     short_type_name = None
 
-    COMMON_TYPES = {}  # Used to exclude common types from the MAX_PROP_VALUES
+    common_types = {}  # Used to exclude common types from the MAX_PROP_VALUES
     if origin in (Union, UnionType):
         non_literal_types = []  # List for all the non-literal types
 
@@ -902,7 +902,7 @@ def prop_docs(prop: Prop) -> list[rx.Component]:
 
     elif origin is Literal:
         literal_values = list(map(str, args))
-        if len(literal_values) > MAX_PROP_VALUES and prop.name not in COMMON_TYPES:
+        if len(literal_values) > max_prop_values and prop.name not in common_types:
             type_name = "Literal"
         else:
             type_name = " | ".join([f'"{value}"' for value in literal_values])
@@ -936,14 +936,14 @@ def prop_docs(prop: Prop) -> list[rx.Component]:
         rx.table.cell(
             rx.box(
                 rx.cond(
-                    (len(literal_values) > 0) & (prop.name not in COMMON_TYPES),
+                    (len(literal_values) > 0) & (prop.name not in common_types),
                     rx.code(
                         (
                             " | ".join(
-                                [f'"{v}"' for v in literal_values[:MAX_PROP_VALUES]]
+                                [f'"{v}"' for v in literal_values[:max_prop_values]]
                                 + ["..."]
                             )
-                            if len(literal_values) > MAX_PROP_VALUES
+                            if len(literal_values) > max_prop_values
                             else type_name
                         ),
                         style=get_code_style(color),
@@ -956,8 +956,8 @@ def prop_docs(prop: Prop) -> list[rx.Component]:
                     ),
                 ),
                 rx.cond(
-                    len(literal_values) > MAX_PROP_VALUES
-                    and prop.name not in COMMON_TYPES,
+                    len(literal_values) > max_prop_values
+                    and prop.name not in common_types,
                     hovercard(
                         rx.icon(
                             tag="circle-ellipsis",
@@ -1045,7 +1045,7 @@ def generate_props(src, component, comp):
         else:
             comp = rx.fragment()
     except Exception as e:
-        print(f"Failed to create component {component.__name__}, error: {e}")
+        print(f"Failed to create component {component.__name__}, error: {e}")  # noqa: T201
         comp = rx.fragment()
 
     interactive_component = (

@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from reflex_chakra.components.base import ChakraComponent, LiteralImageLoading
 from reflex.components.component import Component
-from reflex.event import EventHandler
+from reflex.event import EventHandler, no_args_event_spec
 from reflex.vars.base import Var
+
+from reflex_chakra.components.base import ChakraComponent, LiteralImageLoading
 
 
 class Image(ChakraComponent):
@@ -52,7 +53,7 @@ class Image(ChakraComponent):
     src_set: Var[str]
 
     # Fired when the image fails to load.
-    on_error: EventHandler[lambda: []]
+    on_error: EventHandler[no_args_event_spec]
 
     # Fired when the image is loaded.
-    on_load: EventHandler[lambda: []]
+    on_load: EventHandler[no_args_event_spec]

@@ -1,6 +1,9 @@
 """A button component."""
 
 from typing import ClassVar
+
+from reflex.vars.base import Var
+
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralButtonSize,
@@ -8,7 +11,6 @@ from reflex_chakra.components import (
     LiteralColorScheme,
     LiteralSpinnerPlacement,
 )
-from reflex.vars.base import Var
 
 
 class Button(ChakraComponent):

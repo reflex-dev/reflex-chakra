@@ -1,11 +1,13 @@
 """Table components."""
 
 from typing import ClassVar
-from reflex_chakra.components import ChakraComponent
+
 from reflex.components.component import Component
 from reflex.components.core.foreach import Foreach
 from reflex.utils import types
 from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent
 
 
 class Table(ChakraComponent):
@@ -105,7 +107,8 @@ class Thead(ChakraComponent):
             not isinstance(headers, Var)
             and not types.check_type_in_allowed_types(type(headers), allowed_types)
         ):
-            raise TypeError("table headers should be a list or tuple")
+            msg = "table headers should be a list or tuple"
+            raise TypeError(msg)
 
 
 class Tbody(ChakraComponent):
@@ -170,16 +173,16 @@ class Tbody(ChakraComponent):
                     )
                 )
             ):
-                raise TypeError(
-                    f"table rows should be a list or tuple containing inner lists or tuples. Got {outer_type} instead"
-                )
+                msg = f"table rows should be a list or tuple containing inner lists or tuples. Got {outer_type} instead"
+                raise TypeError(msg)
         elif not (
             types._issubclass(type(rows), allowed_subclasses)
             and (not rows or types._issubclass(type(rows[0]), allowed_subclasses))
         ):
-            raise TypeError(
+            msg = (
                 "table rows should be a list or tuple containing inner lists or tuples."
             )
+            raise TypeError(msg)
 
 
 class Tfoot(ChakraComponent):
@@ -225,7 +228,8 @@ class Tfoot(ChakraComponent):
             not isinstance(footers, Var)
             and not types.check_type_in_allowed_types(type(footers), allowed_types)
         ):
-            raise TypeError("table headers should be a list or tuple")
+            msg = "table headers should be a list or tuple"
+            raise TypeError(msg)
 
 
 class Tr(ChakraComponent):

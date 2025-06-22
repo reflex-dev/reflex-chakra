@@ -1,7 +1,8 @@
 """Typography blocks for doc pages."""
 
 import reflex as rx
-from ...constants import fonts
+
+from rcweb.constants import fonts
 
 
 def definition(title: str, *children) -> rx.Component:

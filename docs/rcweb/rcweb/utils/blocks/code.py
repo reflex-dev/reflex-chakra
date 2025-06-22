@@ -1,7 +1,8 @@
 """Code block components for documentation pages."""
 
 import reflex as rx
-from ...constants import css, fonts
+
+from rcweb.constants import css, fonts
 
 
 @rx.memo
@@ -20,8 +21,6 @@ def code_block(code: str, language: str):
             padding="20px",
             style=fonts.code,
             margin="0",
-            # TODO: use this when it's looking good
-            # can_copy=True,
         ),
         rx.button(
             rx.icon(
@@ -76,8 +75,6 @@ def code_block_dark(code: str, language: str):
             },
             padding="20px",
             margin="0",
-            # TODO: use this when it's looking good
-            # can_copy=True,
         ),
         rx.button(
             rx.icon(

@@ -1,12 +1,13 @@
 """Alert components."""
 
+from reflex.components.component import Component
+from reflex.vars.base import Var
+
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralAlertVariant,
     LiteralStatus,
 )
-from reflex.components.component import Component
-from reflex.vars.base import Var
 
 
 class Alert(ChakraComponent):

@@ -1,14 +1,16 @@
 """Tab components."""
 
 from typing import ClassVar
+
+from reflex.components.component import Component
+from reflex.vars.base import Var
+
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralColorScheme,
     LiteralTabsVariant,
     LiteralTagAlign,
 )
-from reflex.components.component import Component
-from reflex.vars.base import Var
 
 
 class Tabs(ChakraComponent):
@@ -68,7 +70,7 @@ class Tabs(ChakraComponent):
             for label, panel in items:
                 tabs.append(Tab.create(label))
                 panels.append(TabPanel.create(panel))
-            children = [TabList.create(*tabs), TabPanels.create(*panels)]  # type: ignore
+            children = [TabList.create(*tabs), TabPanels.create(*panels)]
         return super().create(*children, **props)
 
 

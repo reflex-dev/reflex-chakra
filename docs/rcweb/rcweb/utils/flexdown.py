@@ -1,11 +1,14 @@
-import flexdown
-import reflex as rx
-import reflex_chakra as rc  # noqa: F401
-import black
 import textwrap
 from typing import Any
-from .blocks import headings, typography, code
-from ..constants import fonts
+
+import black
+import flexdown
+import reflex as rx
+
+import reflex_chakra as rc  # noqa: F401
+from rcweb.constants import fonts
+
+from .blocks import code, headings, typography
 
 demo_box_style = {
     "padding": "24px",
@@ -35,8 +38,6 @@ def code_block(code: str, language: str):
             padding="20px",
             style=fonts.code,
             margin="0",
-            # TODO: use this when it's looking good
-            # can_copy=True,
         ),
         rx.button(
             rx.icon(
@@ -88,8 +89,6 @@ def code_block_dark(code: str, language: str):
             },
             padding="20px",
             margin="0",
-            # TODO: use this when it's looking good
-            # can_copy=True,
         ),
         rx.button(
             rx.icon(
@@ -223,14 +222,12 @@ def docdemo(
                     rx.hstack(
                         "UI",
                     ),
-                    # style=tab_style,
                     value="tab1",
                 ),
                 rx.tabs.trigger(
                     rx.hstack(
                         "Code",
                     ),
-                    # style=tab_style,
                     value="tab2",
                 ),
                 justify_content="end",

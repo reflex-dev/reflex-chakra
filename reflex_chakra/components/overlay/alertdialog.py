@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from reflex.components.component import Component
+from reflex.event import EventHandler, no_args_event_spec
+from reflex.vars.base import Var
+
 from reflex_chakra.components import ChakraComponent, LiteralAlertDialogSize
 from reflex_chakra.components.media.icon import Icon
-from reflex.components.component import Component
-from reflex.event import EventHandler
-from reflex.vars.base import Var
 
 
 class AlertDialog(ChakraComponent):
@@ -54,16 +55,16 @@ class AlertDialog(ChakraComponent):
     use_inert: Var[bool]
 
     # Fired when the modal is closing.
-    on_close: EventHandler[lambda: []]
+    on_close: EventHandler[no_args_event_spec]
 
     # Fired when the modal is closed and the exit animation is complete.
-    on_close_complete: EventHandler[lambda: []]
+    on_close_complete: EventHandler[no_args_event_spec]
 
     # Fired when the Esc key is pressed.
-    on_esc: EventHandler[lambda: []]
+    on_esc: EventHandler[no_args_event_spec]
 
     # Fired when the overlay is clicked.
-    on_overlay_click: EventHandler[lambda: []]
+    on_overlay_click: EventHandler[no_args_event_spec]
 
     @classmethod
     def create(
@@ -104,9 +105,8 @@ class AlertDialog(ChakraComponent):
                     close_button = Icon.create(tag="close")
                 contents.append(AlertDialogCloseButton.create(close_button))
             elif close_button:
-                raise AttributeError(
-                    "Close button can not be used if on_close event handler is not defined"
-                )
+                msg = "Close button can not be used if on_close event handler is not defined"
+                raise AttributeError(msg)
 
             children = [
                 AlertDialogOverlay.create(

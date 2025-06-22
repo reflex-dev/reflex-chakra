@@ -1,13 +1,14 @@
 """Chakra Card component."""
 
+from reflex.components.component import Component
+from reflex.vars.base import Var
+
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralCardVariant,
     LiteralColorScheme,
     LiteralTagSize,
 )
-from reflex.components.component import Component
-from reflex.vars.base import Var
 
 
 class CardHeader(ChakraComponent):
@@ -69,6 +70,7 @@ class Card(ChakraComponent):
         **props,
     ) -> Component:
         """Creates a Chakra Card with a body and optionally header and/or footer, and returns it.
+
         If header, body or footer are not already instances of Chead, Cbody or Cfoot respectively,
         they will be wrapped as such for layout purposes. If you want to modify their props,
         e.g. padding_left, you should wrap them yourself.

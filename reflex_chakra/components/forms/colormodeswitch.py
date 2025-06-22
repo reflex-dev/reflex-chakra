@@ -17,11 +17,12 @@ rx.text(
 
 from __future__ import annotations
 
-from reflex_chakra.components import ChakraComponent
-from reflex_chakra.components.media.icon import Icon
 from reflex.components.component import BaseComponent
 from reflex.components.core.cond import color_mode_cond
 from reflex.style import LIGHT_COLOR_MODE, color_mode, toggle_color_mode
+
+from reflex_chakra.components import ChakraComponent
+from reflex_chakra.components.media.icon import Icon
 
 from .button import Button
 from .switch import Switch
@@ -96,4 +97,4 @@ class ColorModeScript(ChakraComponent):
     """Chakra color mode script."""
 
     tag = "ColorModeScript"
-    initialColorMode = LIGHT_COLOR_MODE
+    initialColorMode = LIGHT_COLOR_MODE  # noqa: N815

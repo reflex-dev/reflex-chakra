@@ -6,17 +6,17 @@ import shutil
 from pathlib import Path
 from typing import Literal
 
-from reflex.components.component import Component
+from reflex.components.component import Component, field
 from reflex.utils.imports import ImportDict, ImportVar
 from reflex.vars.base import Var
-from reflex.components.component import field
+
 from reflex_chakra import constants
 
 
 class ChakraComponent(Component):
     """A component that wraps a Chakra component."""
 
-    library: str = "@chakra-ui/react@2.6.1"  # type: ignore
+    library = "@chakra-ui/react@2.6.1"
     lib_dependencies: list[str] = field(
         default_factory=lambda: [
             "@chakra-ui/system@2.5.7",
@@ -41,6 +41,15 @@ class ChakraComponent(Component):
 
     @classmethod
     def create(cls, *children, **props) -> Component:
+        """Create a new Chakra component.
+
+        Args:
+            *children: The children of the component.
+            **props: The properties of the component.
+
+        Returns:
+            A new Chakra component.
+        """
         # copy color mode provider file to client's asset dir if it doesnt exist.
         client_asset_dir = Path.cwd() / constants.ASSETS_DIR_NAME
         if (
@@ -68,7 +77,6 @@ class ChakraComponent(Component):
         for prop in new_prop_names:
             under_prop = f"{prop}_"
             if under_prop in props:
-                # TODO: decide whether to deprecate this prop namespace conversion
                 props[prop] = props.pop(under_prop)
 
         return super().create(*children, **props)
@@ -99,7 +107,7 @@ class ChakraProvider(ChakraComponent):
             The import dict for the component.
         """
         return {
-            self.library: ImportVar(tag="extendTheme", is_default=False),
+            self.library or "": ImportVar(tag="extendTheme", is_default=False),
             "$/utils/theme": ImportVar(tag="theme", is_default=True),
         }
 
@@ -199,7 +207,7 @@ LiteralLanguage = Literal[
     "it",
 ]
 LiteralInputVariant = Literal["outline", "filled", "flushed", "unstyled"]
-LiteralInputNumberMode = [
+LiteralInputNumberMode = Literal[
     "text",
     "search",
     "none",

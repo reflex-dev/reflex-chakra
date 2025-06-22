@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from reflex.event import EventHandler
+from reflex.vars.base import Var
+
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralColorScheme,
     LiteralTagSize,
 )
-from reflex.event import EventHandler
-from reflex.vars.base import Var
 
 
 class Checkbox(ChakraComponent):

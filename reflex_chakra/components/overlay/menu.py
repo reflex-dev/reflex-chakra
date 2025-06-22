@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from typing import ClassVar
 
+from reflex.components.component import Component
+from reflex.event import EventHandler, no_args_event_spec
+from reflex.vars.base import Var
+
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralChakraDirection,
@@ -11,9 +15,6 @@ from reflex_chakra.components import (
     LiteralMenuStrategy,
 )
 from reflex_chakra.components.forms.button import Button
-from reflex.components.component import Component
-from reflex.event import EventHandler
-from reflex.vars.base import Var
 
 
 class Menu(ChakraComponent):
@@ -70,10 +71,10 @@ class Menu(ChakraComponent):
     strategy: Var[LiteralMenuStrategy]
 
     # Fired when the menu is closed.
-    on_close: EventHandler[lambda: []]
+    on_close: EventHandler[no_args_event_spec]
 
     # Fired when the menu is opened.
-    on_open: EventHandler[lambda: []]
+    on_open: EventHandler[no_args_event_spec]
 
     @classmethod
     def create(

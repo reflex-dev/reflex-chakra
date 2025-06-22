@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from reflex_chakra.components import ChakraComponent
 from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent
 
 
 class Text(ChakraComponent):

@@ -1,18 +1,19 @@
 """Welcome to Reflex! This file outlines the steps to create a basic app."""
 
 import os
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 from types import SimpleNamespace
 
+import flexdown
 import reflex as rx
 from reflex.utils.format import to_kebab_case, to_snake_case
-import reflex_chakra as rc  # noqa: F401
-import flexdown
 
-from .utils.flexdown import xd
-from .utils.docpage import Route, multi_docs
+import reflex_chakra as rc  # noqa: F401
+
 from .constants import css
+from .utils.docpage import Route, multi_docs
+from .utils.flexdown import xd
 
 
 def find_flexdown_files(directory: str) -> list[str]:
@@ -25,7 +26,7 @@ def find_flexdown_files(directory: str) -> list[str]:
         A list of paths to Flexdown files.
     """
     return [
-        os.path.join(root, file).replace("\\", "/")
+        (Path(root) / file).as_posix()
         for root, _, files in os.walk(directory)
         for file in files
         if file.endswith(".md")
@@ -50,7 +51,7 @@ def extract_components_from_metadata(
             components.append((component, comp_str))
         elif hasattr(component, "__self__"):
             components.append((component.__self__, comp_str))
-        elif isinstance(component, SimpleNamespace) and hasattr(component, "__call__"):
+        elif isinstance(component, SimpleNamespace) and hasattr(component, "__call__"):  # noqa: B004
             components.append((component.__call__.__self__, comp_str))
     return components
 
@@ -101,12 +102,13 @@ def create_doc_component(
         A component object representing the document page.
     """
     doc_path = doc_path.replace("\\", "/")
+    doc_path_path = Path(doc_path)
     route_path = to_kebab_case(
         f"/{doc_path.removeprefix(base_dir).replace('.md', '/')}"
     ).replace("//", "/")
-    category = os.path.basename(os.path.dirname(doc_path)).title()
+    category = doc_path_path.parent.name.title()
     document = flexdown.parse_file(doc_path)
-    title = to_snake_case(os.path.basename(doc_path).replace(".md", ""))
+    title = to_snake_case(doc_path_path.name.replace(".md", ""))
     component_list = (title, extract_components_from_metadata(document))
     component_registry[category].append(component_list)
     return multi_docs(

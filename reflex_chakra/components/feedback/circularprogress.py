@@ -1,8 +1,9 @@
 """Container to stack elements with spacing."""
 
-from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
 from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent
 
 
 class CircularProgress(ChakraComponent):

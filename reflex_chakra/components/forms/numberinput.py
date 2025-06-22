@@ -2,14 +2,15 @@
 
 from numbers import Number
 
+from reflex.components.component import Component
+from reflex.event import EventHandler
+from reflex.vars.base import Var
+
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralButtonSize,
     LiteralInputVariant,
 )
-from reflex.components.component import Component
-from reflex.event import EventHandler
-from reflex.vars.base import Var
 
 
 class NumberInput(ChakraComponent):
