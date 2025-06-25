@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from reflex_chakra.components import ChakraComponent, LiteralColorScheme
 from reflex.event import EventHandler
-from reflex.vars import Var
+from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent, LiteralColorScheme
 
 
 class Switch(ChakraComponent):

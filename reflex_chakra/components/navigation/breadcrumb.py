@@ -1,10 +1,11 @@
 """Breadcrumb components."""
 
-from reflex_chakra.components import ChakraComponent
-from reflex_chakra.components.navigation.link import Link
 from reflex.components.component import Component
 from reflex.components.core.foreach import Foreach
-from reflex.vars import Var
+from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent
+from reflex_chakra.components.navigation.link import Link
 
 
 class Breadcrumb(ChakraComponent):
@@ -79,7 +80,7 @@ class BreadcrumbItem(ChakraComponent):
             The BreadcrumbItem component
         """
         if len(children) == 0:
-            children = [BreadcrumbLink.create(label or "", href=href or "")]  # type: ignore
+            children = [BreadcrumbLink.create(label or "", href=href or "")]
         return super().create(*children, **props)
 
 

@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Union
+from typing import Literal
+
+from reflex.components.component import Component
+from reflex.event import EventHandler, no_args_event_spec
+from reflex.vars.base import Var
 
 from reflex_chakra.components import ChakraComponent
 from reflex_chakra.components.media import Icon
-from reflex.components.component import Component
-from reflex.event import EventHandler
-from reflex.vars import Var
 
 ModalSizes = Literal["xs", "sm", "md", "lg", "xl", "full"]
 
@@ -58,25 +59,25 @@ class Modal(ChakraComponent):
     use_inert: Var[bool]
 
     # Fired when the modal is closing.
-    on_close: EventHandler[lambda: []]
+    on_close: EventHandler[no_args_event_spec]
 
     # Fired when the modal is closed and the exit animation is complete.
-    on_close_complete: EventHandler[lambda: []]
+    on_close_complete: EventHandler[no_args_event_spec]
 
     # Fired when the Esc key is pressed.
-    on_esc: EventHandler[lambda: []]
+    on_esc: EventHandler[no_args_event_spec]
 
     # Fired when the overlay is clicked.
-    on_overlay_click: EventHandler[lambda: []]
+    on_overlay_click: EventHandler[no_args_event_spec]
 
     @classmethod
     def create(
         cls,
         *children,
-        header: Optional[Union[Component, str]] = None,
-        body: Optional[Union[Component, str]] = None,
-        footer: Optional[Union[Component, str]] = None,
-        close_button: Optional[Component] = None,
+        header: Component | str | None = None,
+        body: Component | str | None = None,
+        footer: Component | str | None = None,
+        close_button: Component | None = None,
         **props,
     ) -> Component:
         """Create a modal component.
@@ -117,9 +118,8 @@ class Modal(ChakraComponent):
                     close_button = Icon.create(tag="close")
                 contents.append(ModalCloseButton.create(close_button))
             elif close_button:
-                raise AttributeError(
-                    "Close button can not be used if on_close event handler is not defined"
-                )
+                msg = "Close button can not be used if on_close event handler is not defined"
+                raise AttributeError(msg)
 
             children = [
                 ModalOverlay.create(

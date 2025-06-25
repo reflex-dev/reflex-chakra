@@ -1,39 +1,42 @@
 """Utility functions for the component docs page."""
 
-from collections.abc import Callable
+import dataclasses
 import functools
+import hashlib
 import inspect
-import reflex_chakra as rc
-import os
 import re
+import textwrap
+from collections.abc import Callable, Sequence
 from types import UnionType
 from typing import (
     Any,
-    Sequence,
-    Type,
     Literal,
     Union,
     get_args,
     get_origin,
 )
-import mistletoe
-from ..utils.flexdown import xd, markdown, docdemobox
-from ..utils.sidebar import sidebar as sb
-from ..utils.sidebar import MobileAndTabletSidebarState
-from ..utils.blocks.headings import h2_comp, h1_comp
-import reflex as rx
+
 import flexdown
-import textwrap
-from reflex.base import Base
-from reflex.components.component import Component
+import flexdown.blocks
+import mistletoe
+import mistletoe.block_token
+import mistletoe.token
+import reflex as rx
 from reflex.components.base.fragment import Fragment
+from reflex.components.component import Component
 from reflex.components.el.elements.base import BaseHTML
-import hashlib
+from reflex.constants.colors import ColorType
+
+import reflex_chakra as rc
+from rcweb.utils.blocks.headings import h1_comp, h2_comp
+from rcweb.utils.flexdown import docdemobox, markdown, xd
+from rcweb.utils.sidebar import MobileAndTabletSidebarState
+from rcweb.utils.sidebar import sidebar as sb
 
 flat_items = []
 
 # Mapping from types to colors.
-TYPE_COLORS = {
+TYPE_COLORS: dict[str, ColorType] = {
     "int": "red",
     "float": "orange",
     "str": "yellow",
@@ -307,8 +310,7 @@ def get_default_value(lines: list[str], start_index: int) -> str:
         if comment_line.startswith("#"):
             default_match = re.search(r"Default:\s*(.+)$", comment_line)
             if default_match:
-                default_value = default_match.group(1).strip()
-                return default_value
+                return default_match.group(1).strip()
 
     # Get the initial line
     line = lines[start_index]
@@ -337,8 +339,7 @@ def get_default_value(lines: list[str], start_index: int) -> str:
     def process_var_create_safe(match):
         content = match.group(1)
         # Extract only the first argument
-        first_arg = re.split(r",", content)[0].strip()
-        return first_arg
+        return re.split(r",", content)[0].strip()
 
     value = re.sub(r"Var\.create_safe\((.*?)\)", process_var_create_safe, value)
     value = re.sub(r"\bColor\s*\(", "rx.color(", value)
@@ -346,7 +347,8 @@ def get_default_value(lines: list[str], start_index: int) -> str:
     return value.strip()
 
 
-class Prop(Base):
+@dataclasses.dataclass
+class Prop:
     """Hold information about a prop."""
 
     # The name of the prop.
@@ -362,7 +364,8 @@ class Prop(Base):
     default_value: str
 
 
-class Route(Base):
+@dataclasses.dataclass(kw_only=True)
+class Route:
     """A page route."""
 
     # The path of the route.
@@ -403,6 +406,10 @@ def get_path(component_fn: Callable):
     """
     module = inspect.getmodule(component_fn)
 
+    if module is None:
+        msg = f"Could not find module for {component_fn}"
+        raise ValueError(msg)
+
     # Create a path based on the module name.
     return (
         module.__name__.replace(".", "/").replace("_", "-").split("pcweb/pages")[1]
@@ -411,12 +418,12 @@ def get_path(component_fn: Callable):
 
 
 def docpage(
+    chakra_components: dict[str, list[tuple[str, list[tuple[type, str]]]]],
     set_path: str | None = None,
     t: str | None = None,
     right_sidebar: bool = True,
     page_title: str | None = None,
     pseudo_right_bar: bool = False,
-    chakra_components={},
 ):
     """A template that most pages on the reflex.dev site should use.
 
@@ -430,7 +437,10 @@ def docpage(
         A wrapper function that returns the full webpage.
     """
 
-    def docpage(contents: Callable[[], Route]) -> Route:
+    def docpage(
+        contents: Callable[[], Component]
+        | Callable[[], tuple[list[tuple[int, str]], Component]],
+    ) -> Route:
         """Wrap a component in a docpage template.
 
         Args:
@@ -511,16 +521,16 @@ def docpage(
             else:
                 links.append(rx.fragment())
 
-            toc = []
+            table_of_contents = []
             if not isinstance(contents, rx.Component):
                 comp = contents(*args, **kwargs)
             else:
                 comp = contents
 
             if isinstance(comp, tuple):
-                toc, comp = comp
+                table_of_contents, comp = comp
 
-            show_right_sidebar = right_sidebar and len(toc) >= 2
+            show_right_sidebar = right_sidebar and len(table_of_contents) >= 2
 
             main_content_width = " lg:w-[60%]" if show_right_sidebar else " lg:w-full"
 
@@ -626,7 +636,7 @@ def docpage(
                                                 )
                                             )
                                         )
-                                        for level, text in toc
+                                        for level, text in table_of_contents
                                     ],
                                     class_name="flex flex-col gap-4 list-none",
                                 ),
@@ -672,18 +682,19 @@ def docpage(
     return docpage
 
 
-class Source(Base):
+@dataclasses.dataclass(init=False)
+class Source:
     """Parse the source code of a component."""
 
     # The component to parse.
-    component: Type[Component]
+    component: type[Component]
 
     # The source code.
-    code: list[str] = []
+    code: list[str] = dataclasses.field(default_factory=list)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, component: type[Component]):
         """Initialize the source code parser."""
-        super().__init__(*args, **kwargs)
+        self.component = component
 
         # Get the source code.
         self.code = [
@@ -698,7 +709,7 @@ class Source(Base):
         Returns:
             The docstring of the component.
         """
-        return self.component.__doc__
+        return self.component.__doc__ or ""
 
     def get_props(self) -> list[Prop]:
         """Get a dictionary of the props and their descriptions.
@@ -752,9 +763,9 @@ class Source(Base):
 
             if i > 0:
                 comment_above = self.code[i - 1].strip()
-                assert comment_above.startswith("#"), (
-                    f"Expected comment, got {comment_above}"
-                )
+                if not comment_above.startswith("#"):
+                    msg = f"Expected comment above prop {prop}, got {comment_above}"
+                    raise ValueError(msg)
 
             comment = Source.get_comment(comments)
             comments.clear()
@@ -777,7 +788,7 @@ class Source(Base):
         return "".join([comment.strip().strip("#") for comment in comments])
 
 
-def get_code_style(color: str):
+def get_code_style(color: ColorType):
     return {
         "color": rx.color(color, 11),
         "border_radius": "0.25rem",
@@ -840,20 +851,20 @@ def prop_docs(prop: Prop) -> list[rx.Component]:
     """Generate the docs for a prop."""
     # Get the type of the prop.
     type_ = prop.type_
-    if rx.utils.types._issubclass(prop.type_, rx.Var):
+    if get_origin(type_) is rx.Var:
         # For vars, get the type of the var.
-        type_ = rx.utils.types.get_args(type_)[0]
+        type_ = get_args(type_)[0]
 
     origin = get_origin(type_)
     args = get_args(type_)
 
     literal_values = []  # Literal values of the prop
     all_types = []  # List for all the prop types
-    MAX_PROP_VALUES = 2
+    max_prop_values = 2
 
     short_type_name = None
 
-    COMMON_TYPES = {}  # Used to exclude common types from the MAX_PROP_VALUES
+    common_types = {}  # Used to exclude common types from the MAX_PROP_VALUES
     if origin in (Union, UnionType):
         non_literal_types = []  # List for all the non-literal types
 
@@ -891,7 +902,7 @@ def prop_docs(prop: Prop) -> list[rx.Component]:
 
     elif origin is Literal:
         literal_values = list(map(str, args))
-        if len(literal_values) > MAX_PROP_VALUES and prop.name not in COMMON_TYPES:
+        if len(literal_values) > max_prop_values and prop.name not in common_types:
             type_name = "Literal"
         else:
             type_name = " | ".join([f'"{value}"' for value in literal_values])
@@ -925,14 +936,14 @@ def prop_docs(prop: Prop) -> list[rx.Component]:
         rx.table.cell(
             rx.box(
                 rx.cond(
-                    (len(literal_values) > 0) & (prop.name not in COMMON_TYPES),
+                    (len(literal_values) > 0) & (prop.name not in common_types),
                     rx.code(
                         (
                             " | ".join(
-                                [f'"{v}"' for v in literal_values[:MAX_PROP_VALUES]]
+                                [f'"{v}"' for v in literal_values[:max_prop_values]]
                                 + ["..."]
                             )
-                            if len(literal_values) > MAX_PROP_VALUES
+                            if len(literal_values) > max_prop_values
                             else type_name
                         ),
                         style=get_code_style(color),
@@ -945,8 +956,8 @@ def prop_docs(prop: Prop) -> list[rx.Component]:
                     ),
                 ),
                 rx.cond(
-                    len(literal_values) > MAX_PROP_VALUES
-                    and prop.name not in COMMON_TYPES,
+                    len(literal_values) > max_prop_values
+                    and prop.name not in common_types,
                     hovercard(
                         rx.icon(
                             tag="circle-ellipsis",
@@ -1034,7 +1045,7 @@ def generate_props(src, component, comp):
         else:
             comp = rx.fragment()
     except Exception as e:
-        print(f"Failed to create component {component.__name__}, error: {e}")
+        print(f"Failed to create component {component.__name__}, error: {e}")  # noqa: T201
         comp = rx.fragment()
 
     interactive_component = (
@@ -1214,12 +1225,12 @@ def component_docs(component_tuple, comp):
     )
 
 
-def get_headings(comp):
+def get_headings(
+    comp: mistletoe.Document | mistletoe.token.Token,
+) -> list[tuple[int, str]]:
     """Get the strings from markdown component."""
     if isinstance(comp, mistletoe.block_token.Heading):
-        heading_text = "".join(
-            token.content for token in comp.children if hasattr(token, "content")
-        )
+        heading_text = comp.content
         return [(comp.level, heading_text)]
 
     # Recursively get the strings from the children.
@@ -1232,9 +1243,12 @@ def get_headings(comp):
     return headings
 
 
-def get_toc(source, href, component_list=None):
+def get_table_of_contents(
+    source: flexdown.Document,
+    href: str,
+    component_list: list[tuple[type, str]] | None = None,
+):
     component_list = component_list or []
-    component_list = component_list[1:]
 
     # Generate the TOC
     # The environment used for execing and evaling code.
@@ -1242,11 +1256,11 @@ def get_toc(source, href, component_list=None):
     env["__xd"] = xd
 
     # Get the content of the document.
-    source = source.content
+    source_str = source.content
 
     # Get the blocks in the source code.
     # Note: we must use reflex-web's special flexdown instance xd here - it knows about all custom block types (like DemoBlock)
-    blocks = xd.get_blocks(source, href)
+    blocks = xd.get_blocks(source_str, href)
 
     content_pieces = []
     for block in blocks:
@@ -1268,96 +1282,31 @@ def get_toc(source, href, component_list=None):
 
     if len(component_list):
         headings.append((1, "API Reference"))
-    for component_tuple in component_list:
-        headings.append((2, component_tuple[1]))
+    for _, component_name in component_list:
+        headings.append((2, component_name))
     return headings
 
 
-def multi_docs(path, comp, component_list, title, chakra_components):
+def multi_docs(
+    path: str,
+    comp: flexdown.Document,
+    component_list: tuple[str, list[tuple[type, str]]],
+    title: str,
+    chakra_components: dict[str, list[tuple[str, list[tuple[type, str]]]]],
+):
     components = [
-        component_docs(component_tuple, comp) for component_tuple in component_list[1:]
+        component_docs(component_tuple, comp) for component_tuple in component_list[1]
     ]
     fname = path.strip("/") + ".md"
-    ll_doc_exists = os.path.exists(fname.replace(".md", "-ll.md"))
-
-    active_class_name = "font-small bg-slate-2 p-2 text-slate-11 rounded-xl shadow-large w-28 cursor-default border border-slate-4 text-center"
-
-    non_active_class_name = "font-small w-28 transition-color hover:text-slate-11 text-slate-9 p-2 text-center"
-
-    def links(current_page, ll_doc_exists, path):
-        path = str(path).rstrip("/")
-        if ll_doc_exists:
-            if current_page == "hl":
-                return rx.box(
-                    rx.box(class_name="flex-grow"),
-                    rx.box(
-                        rx.link(
-                            rx.box(rx.text("High Level"), class_name=active_class_name),
-                            underline="none",
-                        ),
-                        rx.link(
-                            rx.box(
-                                rx.text("Low Level"), class_name=non_active_class_name
-                            ),
-                            href=path + "/low",
-                            underline="none",
-                        ),
-                        class_name="bg-slate-3 rounded-[1.125rem] p-2 gap-2 flex items-center justify-center",
-                    ),
-                    class_name="flex mb-2",
-                )
-            else:
-                return rx.box(
-                    rx.box(class_name="flex-grow"),
-                    rx.flex(
-                        rx.link(
-                            rx.box(
-                                rx.text("High Level"), class_name=non_active_class_name
-                            ),
-                            href=path,
-                            underline="none",
-                        ),
-                        rx.link(
-                            rx.box(rx.text("Low Level"), class_name=active_class_name),
-                            href=path + "/low",
-                            underline="none",
-                        ),
-                        class_name="bg-slate-3 rounded-[1.125rem] p-2 gap-2 flex items-center justify-center",
-                    ),
-                    class_name="flex mb-2",
-                )
-        return rx.fragment()
 
     @docpage(set_path=path, t=title, chakra_components=chakra_components)
     def out():
-        toc = get_toc(comp, fname, component_list)
-        return toc, rx.box(
-            links("hl", ll_doc_exists, path),
+        table_of_contents = get_table_of_contents(comp, fname, component_list[1])
+        return table_of_contents, rx.box(
             xd.render(comp, filename=fname),
             h1_comp(text="API Reference"),
             rx.box(*components, class_name="flex flex-col"),
             class_name="flex flex-col w-full",
         )
 
-    @docpage(
-        set_path=path + "low",
-        t=title + " (Low Level)",
-        chakra_components=chakra_components,
-    )
-    def ll():
-        nonlocal fname
-        fname = fname.replace(".md", "-ll.md")
-        d2 = flexdown.parse_file(fname)
-        toc = get_toc(d2, fname, component_list)
-        return toc, rx.box(
-            links("ll", ll_doc_exists, path),
-            xd.render_file(fname),
-            h1_comp(text="API Reference"),
-            rx.box(*components, class_name="flex flex-col"),
-            class_name="flex flex-col w-full",
-        )
-
-    if ll_doc_exists:
-        return (out, ll)
-    else:
-        return out
+    return out

@@ -1,12 +1,13 @@
 """Table components."""
 
-from typing import List, Tuple
+from typing import ClassVar
 
-from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
 from reflex.components.core.foreach import Foreach
 from reflex.utils import types
-from reflex.vars import Var
+from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent
 
 
 class Table(ChakraComponent):
@@ -66,7 +67,7 @@ class Thead(ChakraComponent):
     tag = "Thead"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Tfoot"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Tfoot"]
 
     @classmethod
     def create(cls, *children, headers=None, **props) -> Component:
@@ -100,16 +101,14 @@ class Thead(ChakraComponent):
         """
         allowed_types = (list, tuple)
         if (
-            (
-                isinstance(headers, Var)
-                and not types.check_type_in_allowed_types(
-                    headers._var_type, allowed_types
-                )
-            )
-            or not isinstance(headers, Var)
+            isinstance(headers, Var)
+            and not types.check_type_in_allowed_types(headers._var_type, allowed_types)
+        ) or (
+            not isinstance(headers, Var)
             and not types.check_type_in_allowed_types(type(headers), allowed_types)
         ):
-            raise TypeError("table headers should be a list or tuple")
+            msg = "table headers should be a list or tuple"
+            raise TypeError(msg)
 
 
 class Tbody(ChakraComponent):
@@ -118,7 +117,7 @@ class Tbody(ChakraComponent):
     tag = "Tbody"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Tfoot", "Td", "Th"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Tfoot", "Td", "Th"]
 
     @classmethod
     def create(cls, *children, rows=None, **props) -> Component:
@@ -157,7 +156,7 @@ class Tbody(ChakraComponent):
         Raises:
             TypeError: If rows are not lists or tuples containing inner lists or tuples.
         """
-        allowed_subclasses = (List, Tuple)
+        allowed_subclasses = (list, tuple)
         if isinstance(rows, Var):
             outer_type = rows._var_type
             inner_type = (
@@ -174,16 +173,16 @@ class Tbody(ChakraComponent):
                     )
                 )
             ):
-                raise TypeError(
-                    f"table rows should be a list or tuple containing inner lists or tuples. Got {outer_type} instead"
-                )
+                msg = f"table rows should be a list or tuple containing inner lists or tuples. Got {outer_type} instead"
+                raise TypeError(msg)
         elif not (
             types._issubclass(type(rows), allowed_subclasses)
             and (not rows or types._issubclass(type(rows[0]), allowed_subclasses))
         ):
-            raise TypeError(
+            msg = (
                 "table rows should be a list or tuple containing inner lists or tuples."
             )
+            raise TypeError(msg)
 
 
 class Tfoot(ChakraComponent):
@@ -192,7 +191,7 @@ class Tfoot(ChakraComponent):
     tag = "Tfoot"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Td", "Th", "Tfoot"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Td", "Th", "Tfoot"]
 
     @classmethod
     def create(cls, *children, footers=None, **props) -> Component:
@@ -223,16 +222,14 @@ class Tfoot(ChakraComponent):
         """
         allowed_types = (list, tuple)
         if (
-            (
-                isinstance(footers, Var)
-                and not types.check_type_in_allowed_types(
-                    footers._var_type, allowed_types
-                )
-            )
-            or not isinstance(footers, Var)
+            isinstance(footers, Var)
+            and not types.check_type_in_allowed_types(footers._var_type, allowed_types)
+        ) or (
+            not isinstance(footers, Var)
             and not types.check_type_in_allowed_types(type(footers), allowed_types)
         ):
-            raise TypeError("table headers should be a list or tuple")
+            msg = "table headers should be a list or tuple"
+            raise TypeError(msg)
 
 
 class Tr(ChakraComponent):
@@ -241,7 +238,7 @@ class Tr(ChakraComponent):
     tag = "Tr"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Tfoot", "Tr"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Tfoot", "Tr"]
 
     @classmethod
     def create(cls, *children, cell_type: str = "", cells=None, **props) -> Component:
@@ -272,7 +269,7 @@ class Th(ChakraComponent):
     tag = "Th"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead", "Tr", "Td", "Th"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead", "Tr", "Td", "Th"]
 
     # Aligns the cell content to the right.
     is_numeric: Var[bool]
@@ -284,7 +281,7 @@ class Td(ChakraComponent):
     tag = "Td"
 
     # invalid children components
-    _invalid_children: List[str] = ["Tbody", "Thead"]
+    _invalid_children: ClassVar[list[str]] = ["Tbody", "Thead"]
 
     # Aligns the cell content to the right.
     is_numeric: Var[bool]

@@ -1,10 +1,11 @@
 """Convenience functions to define core components."""
 
+from reflex.components.el.elements.forms import Option
+
 from .button import Button, ButtonGroup
 from .checkbox import Checkbox, CheckboxGroup
 from .colormodeswitch import (
     ColorModeButton,
-    color_mode_icon,
     ColorModeScript,
     ColorModeSwitch,
 )
@@ -22,8 +23,6 @@ from .input import (
     InputRightAddon,
     InputRightElement,
 )
-from .multiselect import Option as MultiSelectOption
-from .multiselect import Select as MultiSelect
 from .numberinput import (
     NumberDecrementStepper,
     NumberIncrementStepper,
@@ -40,10 +39,61 @@ from .rangeslider import (
     RangeSliderThumb,
     RangeSliderTrack,
 )
-from .select import Option, Select
+from .select import Select
 from .slider import Slider, SliderFilledTrack, SliderMark, SliderThumb, SliderTrack
 from .switch import Switch
 from .textarea import TextArea
 from .time_picker import TimePicker
 
-__all__ = [f for f in dir() if f[0].isupper()]  # type: ignore
+__all__ = [
+    "Button",
+    "ButtonGroup",
+    "Checkbox",
+    "CheckboxGroup",
+    "ColorModeButton",
+    "ColorModeScript",
+    "ColorModeSwitch",
+    "DatePicker",
+    "DateTimePicker",
+    "Editable",
+    "EditableInput",
+    "EditablePreview",
+    "EditableTextarea",
+    "Email",
+    "Form",
+    "FormControl",
+    "FormErrorMessage",
+    "FormHelperText",
+    "FormLabel",
+    "IconButton",
+    "Input",
+    "InputGroup",
+    "InputLeftAddon",
+    "InputLeftElement",
+    "InputRightAddon",
+    "InputRightElement",
+    "NumberDecrementStepper",
+    "NumberIncrementStepper",
+    "NumberInput",
+    "NumberInputField",
+    "NumberInputStepper",
+    "Option",
+    "Password",
+    "PinInput",
+    "PinInputField",
+    "Radio",
+    "RadioGroup",
+    "RangeSlider",
+    "RangeSliderFilledTrack",
+    "RangeSliderThumb",
+    "RangeSliderTrack",
+    "Select",
+    "Slider",
+    "SliderFilledTrack",
+    "SliderMark",
+    "SliderThumb",
+    "SliderTrack",
+    "Switch",
+    "TextArea",
+    "TimePicker",
+]

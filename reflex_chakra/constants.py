@@ -1,3 +1,5 @@
+"""Constants for the Reflex Chakra package."""
+
 from pathlib import Path
 
 ASSETS_DIR_NAME = "assets"

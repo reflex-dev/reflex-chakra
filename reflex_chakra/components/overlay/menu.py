@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import ClassVar
+
+from reflex.components.component import Component
+from reflex.event import EventHandler, no_args_event_spec
+from reflex.vars.base import Var
 
 from reflex_chakra.components import (
     ChakraComponent,
@@ -11,9 +15,6 @@ from reflex_chakra.components import (
     LiteralMenuStrategy,
 )
 from reflex_chakra.components.forms.button import Button
-from reflex.components.component import Component
-from reflex.event import EventHandler
-from reflex.vars import Var
 
 
 class Menu(ChakraComponent):
@@ -70,17 +71,17 @@ class Menu(ChakraComponent):
     strategy: Var[LiteralMenuStrategy]
 
     # Fired when the menu is closed.
-    on_close: EventHandler[lambda: []]
+    on_close: EventHandler[no_args_event_spec]
 
     # Fired when the menu is opened.
-    on_open: EventHandler[lambda: []]
+    on_open: EventHandler[no_args_event_spec]
 
     @classmethod
     def create(
         cls,
         *children,
-        button: Optional[Component] = None,
-        items: Optional[List] = None,
+        button: Component | None = None,
+        items: list | None = None,
         **props,
     ) -> Component:
         """Create a menu component.
@@ -117,7 +118,7 @@ class MenuButton(ChakraComponent):
     variant: Var[str]
 
     # Components that are not allowed as children.
-    _invalid_children: List[str] = ["Button", "MenuButton"]
+    _invalid_children: ClassVar[list[str]] = ["Button", "MenuButton"]
 
     # The tag to use for the menu button.
     as_: Var[str]
@@ -129,7 +130,7 @@ class MenuList(ChakraComponent):
     tag = "MenuList"
 
     @classmethod
-    def create(cls, *children, items: Optional[list] = None, **props) -> Component:
+    def create(cls, *children, items: list | None = None, **props) -> Component:
         """Create a MenuList component, and automatically wrap in MenuItem if not already one.
 
         Args:

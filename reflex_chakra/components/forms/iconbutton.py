@@ -1,10 +1,9 @@
 """An icon button component."""
 
-from typing import Optional
+from reflex.components.component import Component
+from reflex.vars.base import Var
 
 from reflex_chakra.components.typography.text import Text
-from reflex.components.component import Component
-from reflex.vars import Var
 
 
 class IconButton(Text):
@@ -20,7 +19,7 @@ class IconButton(Text):
     aria_label: Var[str]
 
     # The icon to be used in the button.
-    icon: Optional[Component]
+    icon: Var[Component]
 
     # If true, the button will be styled in its active state.
     is_active: Var[bool]

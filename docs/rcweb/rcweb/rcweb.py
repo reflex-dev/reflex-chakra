@@ -1,33 +1,19 @@
 """Welcome to Reflex! This file outlines the steps to create a basic app."""
 
 import os
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 from types import SimpleNamespace
 
-import reflex as rx
-import reflex_chakra as rc
 import flexdown
+import reflex as rx
+from reflex.utils.format import to_kebab_case, to_snake_case
 
-from .utils.flexdown import xd
-from .utils.docpage import multi_docs
+import reflex_chakra as rc  # noqa: F401
+
 from .constants import css
-
-
-def should_skip_compile(doc: flexdown.Document):
-    """Skip compilation if the markdown file has not been modified since the last compilation."""
-    if not os.environ.get("REFLEX_PERSIST_WEB_DIR", False):
-        return False
-
-    # Check if the doc has been compiled already.
-    compiled_output = f".web/pages/{doc.replace('.md', '.js')}"
-    # Get the timestamp of the compiled file.
-    compiled_time = (
-        os.path.getmtime(compiled_output) if os.path.exists(compiled_output) else 0
-    )
-    # Get the timestamp of the source file.
-    source_time = os.path.getmtime(doc)
-    return compiled_time > source_time
+from .utils.docpage import Route, multi_docs
+from .utils.flexdown import xd
 
 
 def find_flexdown_files(directory: str) -> list[str]:
@@ -40,14 +26,16 @@ def find_flexdown_files(directory: str) -> list[str]:
         A list of paths to Flexdown files.
     """
     return [
-        os.path.join(root, file).replace("\\", "/")
+        (Path(root) / file).as_posix()
         for root, _, files in os.walk(directory)
         for file in files
         if file.endswith(".md")
     ]
 
 
-def extract_components_from_metadata(document) -> list:
+def extract_components_from_metadata(
+    document: flexdown.Document,
+) -> list[tuple[type, str]]:
     """Extract components from the document metadata.
 
     Args:
@@ -56,14 +44,14 @@ def extract_components_from_metadata(document) -> list:
     Returns:
         A list of tuples containing component instances and their string representation.
     """
-    components = []
+    components: list[tuple[type, str]] = []
     for comp_str in document.metadata.get("components", []):
         component = eval(comp_str)
         if isinstance(component, type):
             components.append((component, comp_str))
         elif hasattr(component, "__self__"):
             components.append((component.__self__, comp_str))
-        elif isinstance(component, SimpleNamespace) and hasattr(component, "__call__"):
+        elif isinstance(component, SimpleNamespace) and hasattr(component, "__call__"):  # noqa: B004
             components.append((component.__call__.__self__, comp_str))
     return components
 
@@ -99,8 +87,10 @@ def convert_to_title_case(text: str) -> str:
 
 
 def create_doc_component(
-    doc_path: str, base_dir: str, component_registry: defaultdict
-) -> rx.Component:
+    doc_path: str,
+    base_dir: str,
+    component_registry: defaultdict[str, list[tuple[str, list[tuple[type, str]]]]],
+) -> Route:
     """Create a document component for a given file path.
 
     Args:
@@ -112,13 +102,14 @@ def create_doc_component(
         A component object representing the document page.
     """
     doc_path = doc_path.replace("\\", "/")
-    route_path = rx.utils.format.to_kebab_case(
+    doc_path_path = Path(doc_path)
+    route_path = to_kebab_case(
         f"/{doc_path.removeprefix(base_dir).replace('.md', '/')}"
     ).replace("//", "/")
-    category = os.path.basename(os.path.dirname(doc_path)).title()
+    category = doc_path_path.parent.name.title()
     document = flexdown.parse_file(doc_path)
-    title = rx.utils.format.to_snake_case(os.path.basename(doc_path).replace(".md", ""))
-    component_list = [title, *extract_components_from_metadata(document)]
+    title = to_snake_case(doc_path_path.name.replace(".md", ""))
+    component_list = (title, extract_components_from_metadata(document))
     component_registry[category].append(component_list)
     return multi_docs(
         path=route_path,
@@ -129,7 +120,7 @@ def create_doc_component(
     )
 
 
-def generate_document_routes(doc_paths: list[str], base_dir: str) -> list[rx.Component]:
+def generate_document_routes(doc_paths: list[str], base_dir: str) -> list[Route]:
     """Generate document components and routes from Flexdown file paths.
 
     Args:
@@ -146,9 +137,7 @@ def generate_document_routes(doc_paths: list[str], base_dir: str) -> list[rx.Com
     ]
 
 
-def setup_application_routes(
-    app: rx.App, doc_routes: list[rx.Component], base_path: str
-):
+def setup_application_routes(app: rx.App, doc_routes: list[Route], base_path: str):
     """Set up application routes based on document components.
 
     Args:

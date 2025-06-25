@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
-
-from reflex_chakra.components import ChakraComponent, LiteralChakraDirection
 from reflex.components.component import Component
 from reflex.event import EventHandler
 from reflex.utils import format
-from reflex.vars import Var
+from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent, LiteralChakraDirection
 
 
 class RangeSlider(ChakraComponent):
@@ -17,10 +16,10 @@ class RangeSlider(ChakraComponent):
     tag = "RangeSlider"
 
     # State var to bind the input.
-    value: Var[List[int]]
+    value: Var[list[int]]
 
     # The default values.
-    default_value: Var[List[int]]
+    default_value: Var[list[int]]
 
     # The writing mode ("ltr" | "rtl")
     direction: Var[LiteralChakraDirection]
@@ -64,9 +63,9 @@ class RangeSlider(ChakraComponent):
         Returns:
             The ref of the component.
         """
-        return None
+        return
 
-    def _get_ref_hook(self) -> Optional[str]:
+    def _get_ref_hook(self):
         """Override the base _get_ref_hook to handle array refs.
 
         Returns:
@@ -75,11 +74,12 @@ class RangeSlider(ChakraComponent):
         if self.id:
             ref = format.format_array_ref(self.id, None)
             if ref:
-                return (
+                return Var(
                     f"const {ref} = Array.from({{length:2}}, () => useRef(null)); "
-                    f"{str(Var.create(ref, _var_is_string=False).as_ref())} = {ref}"
+                    f"{Var(_js_expr=ref)._as_ref()!s} = {ref}",
                 )
             return super()._get_ref_hook()
+        return None
 
     @classmethod
     def create(cls, *children, **props) -> Component:
@@ -95,7 +95,7 @@ class RangeSlider(ChakraComponent):
             The RangeSlider component.
         """
         if len(children) == 0:
-            _id = props.get("id", None)
+            _id = props.get("id")
             if _id:
                 children = [
                     RangeSliderTrack.create(
@@ -135,7 +135,7 @@ class RangeSliderThumb(ChakraComponent):
     # The position of the thumb.
     index: Var[int]
 
-    def _get_ref_hook(self) -> Optional[str]:
+    def _get_ref_hook(self) -> None:
         # hook is None because RangeSlider is handling it.
         return None
 
@@ -147,3 +147,4 @@ class RangeSliderThumb(ChakraComponent):
         """
         if self.id:
             return format.format_array_ref(self.id, self.index)
+        return None

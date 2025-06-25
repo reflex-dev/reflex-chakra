@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from reflex.event import EventHandler, no_args_event_spec
+from reflex.vars.base import Var
+
 from reflex_chakra.components import ChakraComponent, LiteralChakraDirection
-from reflex.event import EventHandler
-from reflex.vars import Var
 
 
 class Tooltip(ChakraComponent):
@@ -64,7 +65,7 @@ class Tooltip(ChakraComponent):
     should_wrap_children: Var[bool]
 
     # Fired when the tooltip is closing.
-    on_close: EventHandler[lambda: []]
+    on_close: EventHandler[no_args_event_spec]
 
     # Fired when the tooltip is opened.
-    on_open: EventHandler[lambda: []]
+    on_open: EventHandler[no_args_event_spec]

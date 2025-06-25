@@ -1,6 +1,7 @@
 """Chakra Card component."""
 
-from typing import Optional
+from reflex.components.component import Component
+from reflex.vars.base import Var
 
 from reflex_chakra.components import (
     ChakraComponent,
@@ -8,8 +9,6 @@ from reflex_chakra.components import (
     LiteralColorScheme,
     LiteralTagSize,
 )
-from reflex.components.component import Component
-from reflex.vars import Var
 
 
 class CardHeader(ChakraComponent):
@@ -66,11 +65,12 @@ class Card(ChakraComponent):
         cls,
         body: Component,
         *,
-        header: Optional[Component] = None,
-        footer: Optional[Component] = None,
+        header: Component | None = None,
+        footer: Component | None = None,
         **props,
     ) -> Component:
         """Creates a Chakra Card with a body and optionally header and/or footer, and returns it.
+
         If header, body or footer are not already instances of Chead, Cbody or Cfoot respectively,
         they will be wrapped as such for layout purposes. If you want to modify their props,
         e.g. padding_left, you should wrap them yourself.

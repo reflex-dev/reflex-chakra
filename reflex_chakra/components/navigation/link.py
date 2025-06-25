@@ -1,10 +1,11 @@
 """A link component."""
 
 from reflex import ImportVar
-from reflex_chakra.components import ChakraComponent
 from reflex.components.component import Component
 from reflex.utils.imports import ImportDict
-from reflex.vars import Var
+from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent
 
 
 class Link(ChakraComponent):
@@ -52,8 +53,9 @@ class Link(ChakraComponent):
             Component: The link component
         """
         if props.get("href") is not None:
-            if not len(children):
-                raise ValueError("Link without a child will not display")
+            if not children:
+                msg = "Link without a child will not display"
+                raise ValueError(msg)
         else:
             # Don't use a NextLink if there is no href.
             props["as_"] = ""

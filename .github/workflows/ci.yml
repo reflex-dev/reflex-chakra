@@ -1,0 +1,80 @@
+name: ci
+env:
+  OPENAI_API_KEY: "dummy"
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.10"
+          enable-cache: true
+          activate-environment: true
+      - name: Install dependencies
+        run: uv sync
+      - name: Run Type Checking
+        uses: jakebailey/pyright-action@v2
+        with:
+          extra-args: reflex_chakra
+          version: PATH
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.10"
+          enable-cache: true
+          activate-environment: true
+      - name: Install dependencies
+        run: uv sync
+      - name: Run Ruff Linter
+        run: ruff check --output-format=github reflex_chakra
+      - name: Run Ruff Formatter
+        run: ruff format --check --diff reflex_chakra
+  check-pyi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          activate-environment: true
+      - name: Install dependencies
+        run: uv sync
+      - name: Run PYI generation
+        run: python regenerate_pyi.py
+      - name: Check if there are any changes
+        run: git diff --exit-code -- "*.pyi" || (echo "PYI files have changed. Please commit the changes." && exit 1)
+  check-export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.10"
+          enable-cache: true
+          activate-environment: true
+      - name: Install Reflex
+        working-directory: ./docs/rcweb
+        run: uv pip install $(grep -ivE "reflex-chakra" requirements.txt)
+
+      - name: Initialize Reflex
+        working-directory: ./docs/rcweb
+        run: uv run reflex init
+
+      - name: Build frontend
+        working-directory: ./docs/rcweb
+        run: uv run reflex export

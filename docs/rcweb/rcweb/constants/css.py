@@ -1,8 +1,10 @@
 """App styling."""
 
 import reflex as rx
-from . import fonts
+
 import reflex_chakra as rc
+
+from . import fonts
 
 font_weights = {
     "bold": "800",
@@ -38,23 +40,6 @@ cell_style = {
     **fonts.small,
     "color": rx.color("slate", 11),
     "line_height": "1.5",
-}
-
-tab_style = {
-    "color": rx.color("slate", 9),
-    "cursor": "pointer",
-    "_hover": {
-        "color": rx.color("slate", 11),
-    },
-    **fonts.small,
-    "padding_x": "0.5em",
-    "padding_y": "0.25em",
-    "&[data-state='active']": {
-        "color": rx.color("violet", 9),
-    },
-    "not:&[data-state='active']": {
-        "color": rx.color("slate", 11),
-    },
 }
 
 

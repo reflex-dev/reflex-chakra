@@ -1,5 +1,7 @@
 """Chakra components."""
-from . import media
+
+from reflex.components.component import Component
+
 from .base import *
 from .datadisplay import *
 from .disclosure import *
@@ -111,8 +113,6 @@ modal_content = ModalContent.create
 modal_footer = ModalFooter.create
 modal_header = ModalHeader.create
 modal_overlay = ModalOverlay.create
-multi_select = MultiSelect.create
-multi_select_option = MultiSelectOption
 number_decrement_stepper = NumberDecrementStepper.create
 number_increment_stepper = NumberIncrementStepper.create
 number_input = NumberInput.create

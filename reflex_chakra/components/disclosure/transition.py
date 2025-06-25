@@ -1,9 +1,8 @@
 """A transition Component."""
 
-from typing import Union
+from reflex.vars.base import Var
 
 from reflex_chakra.components import ChakraComponent
-from reflex.vars import Var
 
 
 class Transition(ChakraComponent):
@@ -49,10 +48,10 @@ class SlideFade(Transition):
     tag = "SlideFade"
 
     # The offset on the horizontal or x axis
-    offsetX: Var[Union[str, int]]
+    offsetX: Var[str | int]  # noqa: N815
 
     # The offset on the vertical or y axis
-    offsetY: Var[Union[str, int]]
+    offsetY: Var[str | int]  # noqa: N815
 
     # If true, the element will be transitioned back to the offset when it leaves. Otherwise, it'll only fade out
     reverse: Var[bool]
@@ -64,10 +63,10 @@ class Collapse(Transition):
     tag = "Collapse"
 
     # If true, the opacity of the content will be animated
-    animateOpacity: Var[bool]
+    animateOpacity: Var[bool]  # noqa: N815
 
     # The height you want the content in its expanded state.
-    endingHeight: Var[str]
+    endingHeight: Var[str]  # noqa: N815
 
     # The height you want the content in its collapsed state.
-    startingHeight: Var[Union[str, int]]
+    startingHeight: Var[str | int]  # noqa: N815

@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+from reflex.components.component import Component
+from reflex.event import EventHandler, no_args_event_spec
+from reflex.vars.base import Var
+
 from reflex_chakra.components import (
     ChakraComponent,
     LiteralChakraDirection,
     LiteralMenuStrategy,
     LiteralPopOverTrigger,
 )
-from reflex.components.component import Component
-from reflex.event import EventHandler
-from reflex.vars import Var
 
 
 class Popover(ChakraComponent):
@@ -82,10 +83,10 @@ class Popover(ChakraComponent):
     trigger: Var[LiteralPopOverTrigger]
 
     # Fired when the popover is closed.
-    on_close: EventHandler[lambda: []]
+    on_close: EventHandler[no_args_event_spec]
 
     # Fired when the popover is opened.
-    on_open: EventHandler[lambda: []]
+    on_open: EventHandler[no_args_event_spec]
 
     @classmethod
     def create(

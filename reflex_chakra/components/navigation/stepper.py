@@ -1,10 +1,11 @@
 """A component to indicate progress through a multi-step process."""
 
-from typing import List, Literal, Optional, Tuple
+from typing import Literal
+
+from reflex.components.component import Component
+from reflex.vars.base import Var
 
 from reflex_chakra.components import ChakraComponent, LiteralColorScheme
-from reflex.components.component import Component
-from reflex.vars import Var
 
 
 class Stepper(ChakraComponent):
@@ -16,7 +17,7 @@ class Stepper(ChakraComponent):
     orientation: Var[Literal["vertical", "horizontal"]]
 
     # The color scheme to use for the stepper; default is blue.
-    colorScheme: Var[LiteralColorScheme]
+    colorScheme: Var[LiteralColorScheme]  # noqa: N815
 
     # Chakra provides a useSteps hook to control the stepper.
     # Instead, use an integer state value to set progress in the stepper.
@@ -28,9 +29,7 @@ class Stepper(ChakraComponent):
     size: Var[str]
 
     @classmethod
-    def create(
-        cls, *children, items: Optional[List[Tuple]] = None, **props
-    ) -> Component:
+    def create(cls, *children, items: list[tuple] | None = None, **props) -> Component:
         """Create a Stepper component.
 
         If the kw-args `items` is provided and is a list, they will be added as children.
@@ -105,7 +104,6 @@ class StepStatus(ChakraComponent):
 
     # The CSS class name to apply when a step is incomplete.
     incomplete: Var[str]
-
 
 
 class StepTitle(ChakraComponent):

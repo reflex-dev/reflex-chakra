@@ -1,10 +1,9 @@
 """Container to stack elements with spacing."""
 
-from typing import List, Optional, Union
+from reflex.components.component import Component
+from reflex.vars.base import Var
 
 from reflex_chakra.components import ChakraComponent
-from reflex.components.component import Component
-from reflex.vars import Var
 
 
 class Accordion(ChakraComponent):
@@ -19,10 +18,10 @@ class Accordion(ChakraComponent):
     allow_toggle: Var[bool]
 
     # The initial index(es) of the expanded accordion item(s).
-    default_index: Var[Optional[List[int]]]
+    default_index: Var[list[int] | None]
 
     # The index(es) of the expanded accordion item
-    index: Var[Union[int, List[int]]]
+    index: Var[int | list[int]]
 
     # If true, height animation and transitions will be disabled.
     reduce_motion: Var[bool]
@@ -33,8 +32,8 @@ class Accordion(ChakraComponent):
         *children,
         items=None,
         icon_pos="right",
-        allow_multiple: Optional[Var[bool]] = None,
-        allow_toggle: Optional[Var[bool]] = None,
+        allow_multiple: Var[bool] | None = None,
+        allow_toggle: Var[bool] | None = None,
         **props,
     ) -> Component:
         """Create an accordion component.

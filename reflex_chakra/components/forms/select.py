@@ -1,12 +1,13 @@
 """A select component."""
 
-from reflex_chakra.components import ChakraComponent, LiteralInputVariant
 from reflex.components.component import Component
 from reflex.components.core.foreach import Foreach
+from reflex.components.el import Option
 from reflex.event import EventHandler
 from reflex.utils.types import _issubclass
-from reflex.vars import Var
-from reflex.components.el import Option as Option
+from reflex.vars.base import Var
+
+from reflex_chakra.components import ChakraComponent, LiteralInputVariant
 
 
 class Select(ChakraComponent):

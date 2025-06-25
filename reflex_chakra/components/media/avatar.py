@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from reflex.event import EventHandler, no_args_event_spec
+from reflex.vars.base import Var
+
 from reflex_chakra.components.base import ChakraComponent, LiteralAvatarSize
-from reflex.event import EventHandler
-from reflex.vars import Var
 
 
 class Avatar(ChakraComponent):
@@ -37,7 +38,7 @@ class Avatar(ChakraComponent):
     size: Var[LiteralAvatarSize]
 
     # Fired when the image fails to load.
-    on_error: EventHandler[lambda: []]
+    on_error: EventHandler[no_args_event_spec]
 
 
 class AvatarBadge(ChakraComponent):

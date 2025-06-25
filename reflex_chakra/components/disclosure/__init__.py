@@ -11,4 +11,21 @@ from .tabs import Tab, TabList, TabPanel, TabPanels, Tabs
 from .transition import Collapse, Fade, ScaleFade, Slide, SlideFade
 from .visuallyhidden import VisuallyHidden
 
-__all__ = [f for f in dir() if f[0].isupper()]  # type: ignore
+__all__ = [
+    "Accordion",
+    "AccordionButton",
+    "AccordionIcon",
+    "AccordionItem",
+    "AccordionPanel",
+    "Collapse",
+    "Fade",
+    "ScaleFade",
+    "Slide",
+    "SlideFade",
+    "Tab",
+    "TabList",
+    "TabPanel",
+    "TabPanels",
+    "Tabs",
+    "VisuallyHidden",
+]
