@@ -53,7 +53,7 @@ class Tooltip(ChakraComponent):
         custom_attrs: dict[str, Var | Any] | None = None,
         on_blur: EventType[()] | None = None,
         on_click: EventType[()] | EventType[PointerEventInfo] | None = None,
-        on_close: EventType[Any] | None = None,
+        on_close: EventType[()] | None = None,
         on_context_menu: EventType[()] | EventType[PointerEventInfo] | None = None,
         on_double_click: EventType[()] | EventType[PointerEventInfo] | None = None,
         on_focus: EventType[()] | None = None,

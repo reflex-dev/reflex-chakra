@@ -65,7 +65,7 @@ class Tooltip(ChakraComponent):
     should_wrap_children: Var[bool]
 
     # Fired when the tooltip is closing.
-    on_close: EventHandler[list]
+    on_close: EventHandler[no_args_event_spec]
 
     # Fired when the tooltip is opened.
     on_open: EventHandler[no_args_event_spec]
