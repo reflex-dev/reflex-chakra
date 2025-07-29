@@ -14,7 +14,6 @@ from reflex.event import (
     EventType,
     PointerEventInfo,
 )
-from reflex.utils.imports import ImportDict
 from reflex.vars.base import Var
 
 from reflex_chakra.components import (
@@ -22,7 +21,6 @@ from reflex_chakra.components import (
 )
 
 class Input(ChakraComponent):
-    def add_imports(self) -> ImportDict: ...
     @classmethod
     def create(
         cls,
