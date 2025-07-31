@@ -1,6 +1,6 @@
 [project]
 name = "reflex-chakra"
-version = "0.8.1"
+dynamic = ["version"]
 description = "reflex using chakra components"
 authors = [{ name = "Elijah Ahianyo", email = "elijahahianyo@gmail.com" }]
 maintainers = [
@@ -15,11 +15,14 @@ dependencies = ["reflex >=0.8.0dev"]
 
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
 include = ["reflex_chakra"]
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
 
 [dependency-groups]
 dev = ["ruff", "pyright"]
