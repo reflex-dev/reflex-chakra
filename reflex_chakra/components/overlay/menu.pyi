@@ -81,7 +81,7 @@ class Menu(ChakraComponent):
 
         Args:
             *children: The children of the component.
-            button: the button that open the menu.
+            button: the button that opens the menu.
             items (list): The items of the menu.
             arrow_padding: The padding required to prevent the arrow from reaching the very edge of the popper.
             auto_select: If true, the first enabled menu item will receive focus and be selected when the menu opens.
@@ -208,7 +208,7 @@ class MenuList(ChakraComponent):
 
         Args:
             *children: The children of the component.
-            items: A list of item to add as child of the component.
+            items: A list of items to add as child of the component.
             style: The style of the component.
             key: A unique key for the component.
             id: The id for the component.

@@ -134,7 +134,6 @@ def doccmdoutput(
     Args:
         command: The command to display.
         output: The output of the command.
-        theme: The theme of the component.
 
     Returns:
         The styled command and its example output.

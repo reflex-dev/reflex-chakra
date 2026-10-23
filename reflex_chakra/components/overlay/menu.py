@@ -88,7 +88,7 @@ class Menu(ChakraComponent):
 
         Args:
             *children: The children of the component.
-            button: the button that open the menu.
+            button: the button that opens the menu.
             items (list): The items of the menu.
             **props: The properties of the component.
 
@@ -135,7 +135,7 @@ class MenuList(ChakraComponent):
 
         Args:
             *children: The children of the component.
-            items: A list of item to add as child of the component.
+            items: A list of items to add as child of the component.
             **props: The properties of the component.
 
         Returns:
