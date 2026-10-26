@@ -50,7 +50,7 @@ class ChakraComponent(Component):
         Returns:
             A new Chakra component.
         """
-        # copy color mode provider file to client's asset dir if it doesnt exist.
+        # copy color mode provider file to client's asset dir if it doesn't exist.
         client_asset_dir = Path.cwd() / constants.ASSETS_DIR_NAME
         if (
             not (

@@ -97,7 +97,7 @@ class Popover(ChakraComponent):
             arrow_size: The size of the popover arrow
             auto_focus: If true, focus will be transferred to the first interactive element when the popover opens
             boundary: The boundary area for the popper. Used within the preventOverflow modifier
-            close_on_blur: If true, the popover will close when you blur out it by clicking outside or tabbing out
+            close_on_blur: If true, the popover will close when you blur out of it by clicking outside or tabbing out
             close_on_esc: If true, the popover will close when you hit the Esc key
             default_is_open: If true, the popover will be initially opened.
             direction: Theme direction ltr or rtl. Popper's placement will be set accordingly

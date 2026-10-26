@@ -105,7 +105,7 @@ class PinInput(ChakraComponent):
         """Override the base _get_ref_hook to handle array refs.
 
         Returns:
-            The overrided hooks.
+            The overridden hooks.
         """
         if self.id:
             ref = format.format_array_ref(self.id, None)
